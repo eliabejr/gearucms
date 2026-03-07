@@ -16,6 +16,9 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as ApiSitemapRouteImport } from './routes/api/sitemap'
+import { Route as ApiRobotsRouteImport } from './routes/api/robots'
+import { Route as ApiOgImageRouteImport } from './routes/api/og-image'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminMediaRouteImport } from './routes/admin/media'
 import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
@@ -65,6 +68,21 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const ApiUploadRoute = ApiUploadRouteImport.update({
   id: '/api/upload',
   path: '/api/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSitemapRoute = ApiSitemapRouteImport.update({
+  id: '/api/sitemap',
+  path: '/api/sitemap',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRobotsRoute = ApiRobotsRouteImport.update({
+  id: '/api/robots',
+  path: '/api/robots',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOgImageRoute = ApiOgImageRouteImport.update({
+  id: '/api/og-image',
+  path: '/api/og-image',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -155,6 +173,9 @@ export interface FileRoutesByFullPath {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/og-image': typeof ApiOgImageRoute
+  '/api/robots': typeof ApiRobotsRoute
+  '/api/sitemap': typeof ApiSitemapRoute
   '/api/upload': typeof ApiUploadRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/collections/$id': typeof AdminCollectionsIdRoute
@@ -178,6 +199,9 @@ export interface FileRoutesByTo {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/og-image': typeof ApiOgImageRoute
+  '/api/robots': typeof ApiRobotsRoute
+  '/api/sitemap': typeof ApiSitemapRoute
   '/api/upload': typeof ApiUploadRoute
   '/admin': typeof AdminIndexRoute
   '/admin/collections/$id': typeof AdminCollectionsIdRoute
@@ -203,6 +227,9 @@ export interface FileRoutesById {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/og-image': typeof ApiOgImageRoute
+  '/api/robots': typeof ApiRobotsRoute
+  '/api/sitemap': typeof ApiSitemapRoute
   '/api/upload': typeof ApiUploadRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/collections/$id': typeof AdminCollectionsIdRoute
@@ -229,6 +256,9 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/media'
     | '/admin/settings'
+    | '/api/og-image'
+    | '/api/robots'
+    | '/api/sitemap'
     | '/api/upload'
     | '/admin/'
     | '/admin/collections/$id'
@@ -252,6 +282,9 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/media'
     | '/admin/settings'
+    | '/api/og-image'
+    | '/api/robots'
+    | '/api/sitemap'
     | '/api/upload'
     | '/admin'
     | '/admin/collections/$id'
@@ -276,6 +309,9 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/media'
     | '/admin/settings'
+    | '/api/og-image'
+    | '/api/robots'
+    | '/api/sitemap'
     | '/api/upload'
     | '/admin/'
     | '/admin/collections/$id'
@@ -296,6 +332,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
   CollectionSlugRoute: typeof CollectionSlugRoute
+  ApiOgImageRoute: typeof ApiOgImageRoute
+  ApiRobotsRoute: typeof ApiRobotsRoute
+  ApiSitemapRoute: typeof ApiSitemapRoute
   ApiUploadRoute: typeof ApiUploadRoute
   ApiAiArticleRoute: typeof ApiAiArticleRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -351,6 +390,27 @@ declare module '@tanstack/react-router' {
       path: '/api/upload'
       fullPath: '/api/upload'
       preLoaderRoute: typeof ApiUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sitemap': {
+      id: '/api/sitemap'
+      path: '/api/sitemap'
+      fullPath: '/api/sitemap'
+      preLoaderRoute: typeof ApiSitemapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/robots': {
+      id: '/api/robots'
+      path: '/api/robots'
+      fullPath: '/api/robots'
+      preLoaderRoute: typeof ApiRobotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/og-image': {
+      id: '/api/og-image'
+      path: '/api/og-image'
+      fullPath: '/api/og-image'
+      preLoaderRoute: typeof ApiOgImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/settings': {
@@ -512,6 +572,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
   CollectionSlugRoute: CollectionSlugRoute,
+  ApiOgImageRoute: ApiOgImageRoute,
+  ApiRobotsRoute: ApiRobotsRoute,
+  ApiSitemapRoute: ApiSitemapRoute,
   ApiUploadRoute: ApiUploadRoute,
   ApiAiArticleRoute: ApiAiArticleRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

@@ -45,6 +45,10 @@ export const entries = sqliteTable("entries", {
 	title: text().notNull(),
 	slug: text().notNull(),
 	status: text().notNull().default("draft"), // draft | published | archived
+	// SEO fields
+	metaTitle: text("meta_title"),
+	metaDescription: text("meta_description"),
+	ogImage: text("og_image"),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),

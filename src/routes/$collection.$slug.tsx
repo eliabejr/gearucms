@@ -2,8 +2,78 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useTRPC } from "#/integrations/trpc/react"
 import { useQuery } from "@tanstack/react-query"
 import ContentRenderer from "#/components/ContentRenderer"
+import Breadcrumbs from "#/components/Breadcrumbs"
+import StructuredData from "#/components/StructuredData"
+import {
+	generateMetaTags,
+	generateArticleJsonLd,
+	extractExcerpt,
+	extractFirstImage,
+	getSiteUrl,
+} from "#/lib/seo"
 
 export const Route = createFileRoute("/$collection/$slug")({
+	loader: async ({ params, context }) => {
+		const data = await context.queryClient.ensureQueryData(
+			context.trpc.entries.getBySlug.queryOptions({
+				collectionSlug: params.collection,
+				entrySlug: params.slug,
+			}),
+		)
+		return { entry: data }
+	},
+	head: ({ loaderData }) => {
+		const entry = loaderData?.entry
+		if (!entry) {
+			return {
+				meta: [{ title: "Not Found" }],
+			}
+		}
+
+		const siteUrl = getSiteUrl()
+		const collectionSlug = entry.collection?.slug ?? ""
+		const canonical = `${siteUrl}/${collectionSlug}/${entry.slug}`
+
+		// Extract description from richtext/text fields
+		const contentFields = (entry.fields ?? [])
+			.filter(
+				(f) =>
+					f.field.type === "richtext" || f.field.type === "text",
+			)
+			.map((f) => f.value ?? "")
+			.join(" ")
+
+		const description =
+			entry.metaDescription || extractExcerpt(contentFields)
+
+		// Extract first image
+		const imageField = (entry.fields ?? []).find(
+			(f) => f.field.type === "image" && f.value,
+		)
+		const ogImage =
+			entry.ogImage ||
+			imageField?.value ||
+			extractFirstImage(contentFields)
+
+		const metaTitle = entry.metaTitle || entry.title
+
+		return {
+			meta: generateMetaTags({
+				title: metaTitle,
+				description,
+				canonical,
+				ogImage: ogImage ?? undefined,
+				ogType: "article",
+				publishedAt: entry.publishedAt
+					? new Date(entry.publishedAt).toISOString()
+					: undefined,
+				modifiedAt: entry.updatedAt
+					? new Date(entry.updatedAt).toISOString()
+					: undefined,
+				section: entry.collection?.name,
+			}),
+		}
+	},
 	component: ContentPage,
 })
 
@@ -45,13 +115,57 @@ function ContentPage() {
 		)
 	}
 
+	const siteUrl = getSiteUrl()
+	const collectionSlug = entry.collection?.slug ?? collection
+	const canonical = `${siteUrl}/${collectionSlug}/${entry.slug}`
+
+	const contentFields = (entry.fields ?? [])
+		.filter(
+			(f) => f.field.type === "richtext" || f.field.type === "text",
+		)
+		.map((f) => f.value ?? "")
+		.join(" ")
+
+	const description =
+		entry.metaDescription || extractExcerpt(contentFields)
+
 	const fieldData = (entry.fields ?? []).map((ef) => ({
 		field: ef.field,
 		value: ef.value,
 	}))
 
+	// Article JSON-LD
+	const articleJsonLd = generateArticleJsonLd({
+		title: entry.metaTitle || entry.title,
+		description,
+		url: canonical,
+		publishedAt: entry.publishedAt
+			? new Date(entry.publishedAt).toISOString()
+			: new Date().toISOString(),
+		modifiedAt: entry.updatedAt
+			? new Date(entry.updatedAt).toISOString()
+			: undefined,
+		image: entry.ogImage ?? undefined,
+		section: entry.collection?.name,
+	})
+
 	return (
 		<main className="page-wrap px-4 py-12">
+			<StructuredData data={articleJsonLd} />
+
+			<Breadcrumbs
+				items={[
+					{
+						label: entry.collection?.name ?? collection,
+						href: `/${collectionSlug}`,
+					},
+					{
+						label: entry.title,
+						href: `/${collectionSlug}/${entry.slug}`,
+					},
+				]}
+			/>
+
 			<article>
 				<header className="mb-8">
 					<p className="island-kicker mb-2">
@@ -61,7 +175,10 @@ function ContentPage() {
 						{entry.title}
 					</h1>
 					{entry.publishedAt && (
-						<time className="text-sm text-[var(--sea-ink-soft)]">
+						<time
+							dateTime={new Date(entry.publishedAt).toISOString()}
+							className="text-sm text-[var(--sea-ink-soft)]"
+						>
 							{new Date(entry.publishedAt).toLocaleDateString(
 								undefined,
 								{

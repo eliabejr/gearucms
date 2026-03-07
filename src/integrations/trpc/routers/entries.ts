@@ -8,6 +8,7 @@ import {
 	entryVersions,
 	collections,
 } from "#/db/schema"
+import { pingIndexNow, pingSitemap, getSiteUrl } from "#/lib/seo"
 import type { TRPCRouterRecord } from "@trpc/server"
 
 function slugify(text: string): string {
@@ -134,6 +135,9 @@ export const entriesRouter = {
 				title: z.string().min(1),
 				slug: z.string().optional(),
 				status: z.enum(["draft", "published"]).default("draft"),
+				metaTitle: z.string().optional(),
+				metaDescription: z.string().optional(),
+				ogImage: z.string().optional(),
 				fields: z.array(
 					z.object({
 						fieldId: z.number(),
@@ -153,6 +157,9 @@ export const entriesRouter = {
 					title: input.title,
 					slug,
 					status: input.status,
+					metaTitle: input.metaTitle || null,
+					metaDescription: input.metaDescription || null,
+					ogImage: input.ogImage || null,
 					publishedAt: input.status === "published" ? now : null,
 				})
 				.returning()
@@ -169,6 +176,18 @@ export const entriesRouter = {
 
 			await createVersion(entry.id, ctx.session?.user?.id)
 
+			// Notify search engines on publish
+			if (input.status === "published") {
+				const col = await db.query.collections.findFirst({
+					where: eq(collections.id, input.collectionId),
+				})
+				if (col) {
+					const url = `${getSiteUrl()}/${col.slug}/${slug}`
+					pingIndexNow([url]).catch(() => {})
+					pingSitemap().catch(() => {})
+				}
+			}
+
 			return entry
 		}),
 
@@ -178,6 +197,9 @@ export const entriesRouter = {
 				id: z.number(),
 				title: z.string().optional(),
 				slug: z.string().optional(),
+				metaTitle: z.string().nullable().optional(),
+				metaDescription: z.string().nullable().optional(),
+				ogImage: z.string().nullable().optional(),
 				fields: z
 					.array(
 						z.object({
@@ -232,6 +254,19 @@ export const entriesRouter = {
 				})
 				.where(eq(entries.id, input.id))
 				.returning()
+
+			// Notify search engines on publish
+			if (input.status === "published") {
+				const col = await db.query.collections.findFirst({
+					where: eq(collections.id, entry.collectionId),
+				})
+				if (col) {
+					const url = `${getSiteUrl()}/${col.slug}/${entry.slug}`
+					pingIndexNow([url]).catch(() => {})
+					pingSitemap().catch(() => {})
+				}
+			}
+
 			return entry
 		}),
 

@@ -9,6 +9,8 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import PageTracker from '../components/PageTracker'
+import StructuredData from '../components/StructuredData'
+import { generateOrganizationJsonLd, getSiteUrl } from '../lib/seo'
 
 import StoreDevtools from '../lib/demo-store-devtools'
 
@@ -52,7 +54,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'CMS',
+      },
+      {
+        name: 'robots',
+        content: 'index, follow',
+      },
+      {
+        property: 'og:site_name',
+        content: 'CMS',
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
       },
     ],
     links: [
@@ -79,6 +93,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
         <TanStackQueryProvider>
+          {!hideChrome && (
+            <StructuredData
+              data={generateOrganizationJsonLd({
+                name: 'CMS',
+                url: getSiteUrl(),
+              })}
+            />
+          )}
           {!hideChrome && <Header />}
           {!hideChrome && <PageTracker />}
           {children}
