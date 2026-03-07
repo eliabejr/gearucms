@@ -45,6 +45,11 @@
     "@tanstack/react-table": "latest",
     "@tanstack/router-plugin": "^1.132.0",
     "@tanstack/store": "latest",
+    "@tiptap/extension-image": "^3.20.1",
+    "@tiptap/extension-link": "^3.20.1",
+    "@tiptap/extension-placeholder": "^3.20.1",
+    "@tiptap/react": "^3.20.1",
+    "@tiptap/starter-kit": "^3.20.1",
     "@trpc/client": "^11.11.0",
     "@trpc/server": "^11.11.0",
     "@trpc/tanstack-react-query": "^11.11.0",
@@ -56,6 +61,7 @@
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.577.0",
     "nitro": "npm:nitro-nightly@latest",
+    "papaparse": "^5.5.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "streamdown": "^2.3.0",
@@ -73,6 +79,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/better-sqlite3": "^7.6.0",
     "@types/node": "^22.10.2",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.4",
@@ -86,9 +93,13 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "@sentry/cli",
+      "better-sqlite3",
       "esbuild",
       "lightningcss",
-      "better-sqlite3"
+      "prisma",
+      "protobufjs"
     ]
   }
 }

@@ -1,12 +1,199 @@
-import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core'
-import { sql } from 'drizzle-orm'
+import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core"
+import { sql } from "drizzle-orm"
 
-export const todos = sqliteTable('todos', {
-  id: integer({ mode: 'number' }).primaryKey({
-    autoIncrement: true,
-  }),
-  title: text().notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`,
-  ),
+// ─── Existing ────────────────────────────────────────────────
+
+export const todos = sqliteTable("todos", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	title: text().notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+})
+
+// ─── Collections (dynamic content types) ─────────────────────
+
+export const collections = sqliteTable("collections", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	name: text().notNull(),
+	slug: text().notNull().unique(),
+	description: text(),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+})
+
+export const collectionFields = sqliteTable("collection_fields", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	collectionId: integer("collection_id")
+		.notNull()
+		.references(() => collections.id, { onDelete: "cascade" }),
+	name: text().notNull(),
+	slug: text().notNull(),
+	type: text().notNull(), // text | richtext | number | boolean | image | relation | date
+	required: integer({ mode: "boolean" }).default(false),
+	sortOrder: integer("sort_order").default(0),
+})
+
+// ─── Entries (content items) ─────────────────────────────────
+
+export const entries = sqliteTable("entries", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	collectionId: integer("collection_id")
+		.notNull()
+		.references(() => collections.id, { onDelete: "cascade" }),
+	title: text().notNull(),
+	slug: text().notNull(),
+	status: text().notNull().default("draft"), // draft | published | archived
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	publishedAt: integer("published_at", { mode: "timestamp" }),
+})
+
+export const entryFields = sqliteTable("entry_fields", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	entryId: integer("entry_id")
+		.notNull()
+		.references(() => entries.id, { onDelete: "cascade" }),
+	fieldId: integer("field_id")
+		.notNull()
+		.references(() => collectionFields.id, { onDelete: "cascade" }),
+	value: text(),
+})
+
+// ─── Content versioning ──────────────────────────────────────
+
+export const entryVersions = sqliteTable("entry_versions", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	entryId: integer("entry_id")
+		.notNull()
+		.references(() => entries.id, { onDelete: "cascade" }),
+	versionNumber: integer("version_number").notNull(),
+	dataSnapshot: text("data_snapshot").notNull(), // JSON of all field values
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	createdBy: text("created_by"),
+})
+
+// ─── Media ───────────────────────────────────────────────────
+
+export const media = sqliteTable("media", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	filename: text().notNull(),
+	originalName: text("original_name").notNull(),
+	url: text().notNull(),
+	size: integer().notNull(),
+	mimeType: text("mime_type").notNull(),
+	width: integer(),
+	height: integer(),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+})
+
+// ─── Analytics ───────────────────────────────────────────────
+
+export const pageViews = sqliteTable("page_views", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	path: text().notNull(),
+	referrer: text(),
+	userAgent: text("user_agent"),
+	country: text(),
+	utmSource: text("utm_source"),
+	utmMedium: text("utm_medium"),
+	utmCampaign: text("utm_campaign"),
+	utmTerm: text("utm_term"),
+	utmContent: text("utm_content"),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+})
+
+// ─── Comments ────────────────────────────────────────────────
+
+export const comments = sqliteTable("comments", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	entryId: integer("entry_id")
+		.notNull()
+		.references(() => entries.id, { onDelete: "cascade" }),
+	authorName: text("author_name").notNull(),
+	authorEmail: text("author_email").notNull(),
+	content: text().notNull(),
+	status: text().notNull().default("pending"), // pending | approved | rejected
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+})
+
+// ─── Tracking scripts ───────────────────────────────────────
+
+export const trackingScripts = sqliteTable("tracking_scripts", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	name: text().notNull(),
+	location: text().notNull(), // head | body_start | body_end
+	script: text().notNull(),
+	active: integer({ mode: "boolean" }).default(true),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+})
+
+// ─── AI batch jobs ───────────────────────────────────────────
+
+export const aiJobs = sqliteTable("ai_jobs", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	status: text().notNull().default("pending"), // pending | processing | completed | failed
+	csvData: text("csv_data").notNull(), // JSON string of parsed CSV rows
+	collectionId: integer("collection_id")
+		.notNull()
+		.references(() => collections.id),
+	imageMode: text("image_mode").notNull().default("none"), // gemini | openai | unsplash | pexels | none
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	completedAt: integer("completed_at", { mode: "timestamp" }),
+})
+
+export const aiJobItems = sqliteTable("ai_job_items", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	jobId: integer("job_id")
+		.notNull()
+		.references(() => aiJobs.id, { onDelete: "cascade" }),
+	title: text().notNull(),
+	scheduleDays: integer("schedule_days").notNull().default(0),
+	status: text().notNull().default("pending"), // pending | generating_text | generating_image | saving | completed | failed
+	entryId: integer("entry_id").references(() => entries.id),
+	generatedText: text("generated_text"),
+	generatedImageUrl: text("generated_image_url"),
+	error: text(),
+	tokensUsed: integer("tokens_used").default(0),
+	imageTokensUsed: integer("image_tokens_used").default(0),
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
+	completedAt: integer("completed_at", { mode: "timestamp" }),
+})
+
+// ─── AI usage tracking ──────────────────────────────────────
+
+export const aiUsageLog = sqliteTable("ai_usage_log", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	jobId: integer("job_id").references(() => aiJobs.id, { onDelete: "cascade" }),
+	jobItemId: integer("job_item_id").references(() => aiJobItems.id, {
+		onDelete: "cascade",
+	}),
+	provider: text().notNull(), // anthropic | openai | gemini
+	model: text().notNull(),
+	type: text().notNull(), // text | image
+	tokensInput: integer("tokens_input").default(0),
+	tokensOutput: integer("tokens_output").default(0),
+	costEstimate: text("cost_estimate"), // stored as string for decimal precision
+	createdAt: integer("created_at", { mode: "timestamp" }).default(
+		sql`(unixepoch())`,
+	),
 })

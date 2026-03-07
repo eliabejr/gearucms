@@ -3,10 +3,12 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
+import { useMatches } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import PageTracker from '../components/PageTracker'
 
 import StoreDevtools from '../lib/demo-store-devtools'
 
@@ -64,6 +66,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const matches = useMatches()
+  const isAdmin = matches.some((m) => m.fullPath.startsWith('/admin'))
+  const isLogin = matches.some((m) => m.fullPath === '/login')
+  const hideChrome = isAdmin || isLogin
+
   return (
     <html lang={getLocale()} suppressHydrationWarning>
       <head>
@@ -72,22 +79,25 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
         <TanStackQueryProvider>
-          <Header />
+          {!hideChrome && <Header />}
+          {!hideChrome && <PageTracker />}
           {children}
-          <Footer />
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-              StoreDevtools,
-              TanStackQueryDevtools,
-            ]}
-          />
+          {!hideChrome && <Footer />}
+          {!hideChrome && (
+            <TanStackDevtools
+              config={{
+                position: 'bottom-right',
+              }}
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+                StoreDevtools,
+                TanStackQueryDevtools,
+              ]}
+            />
+          )}
         </TanStackQueryProvider>
         <Scripts />
       </body>
