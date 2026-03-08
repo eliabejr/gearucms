@@ -17,6 +17,7 @@ import { useTRPC } from "#/integrations/trpc/react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useRef, useCallback } from "react"
 import Papa from "papaparse"
+import Select from "#/components/Select"
 
 export const Route = createFileRoute("/admin/ai-writer")({
 	component: AiWriterPage,
@@ -362,54 +363,48 @@ function AiWriterPage() {
 					{/* Config and generate */}
 					<div className="border-t border-[var(--line)] p-5">
 						<div className="flex flex-wrap items-end gap-4">
-							<div>
+							<div className="min-w-[200px]">
 								<label
 									htmlFor="ai-collection"
 									className="mb-1 block text-sm font-medium text-[var(--sea-ink-soft)]"
 								>
 									Collection
 								</label>
-								<select
+								<Select
 									id="ai-collection"
-									value={collectionId ?? ""}
-									onChange={(e) =>
+									value={collectionId?.toString() ?? ""}
+									onChange={(val) =>
 										setCollectionId(
-											e.target.value
-												? Number(e.target.value)
-												: undefined,
+											val ? Number(val) : undefined,
 										)
 									}
-									className="rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
-								>
-									<option value="">Select collection...</option>
-									{collections?.map((col) => (
-										<option key={col.id} value={col.id}>
-											{col.name}
-										</option>
-									))}
-								</select>
+									options={(collections ?? []).map((col) => ({
+										value: String(col.id),
+										label: col.name,
+									}))}
+									placeholder="Select collection..."
+									isClearable
+								/>
 							</div>
-							<div>
+							<div className="min-w-[180px]">
 								<label
 									htmlFor="ai-image-mode"
 									className="mb-1 block text-sm font-medium text-[var(--sea-ink-soft)]"
 								>
 									Image Mode
 								</label>
-								<select
+								<Select
 									id="ai-image-mode"
 									value={imageMode}
-									onChange={(e) =>
-										setImageMode(e.target.value as ImageMode)
+									onChange={(val) =>
+										setImageMode(val as ImageMode)
 									}
-									className="rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
-								>
-									{imageModeOptions.map((opt) => (
-										<option key={opt.value} value={opt.value}>
-											{opt.label}
-										</option>
-									))}
-								</select>
+									options={imageModeOptions.map((opt) => ({
+										value: opt.value,
+										label: opt.label,
+									}))}
+									isSearchable={false}
+								/>
 							</div>
 							<button
 								type="button"

@@ -4,6 +4,7 @@ import { useTRPC } from "#/integrations/trpc/react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect, lazy, Suspense } from "react"
 import SeoAnalyzer from "#/components/SeoAnalyzer"
+import Select from "#/components/Select"
 
 const TipTapEditor = lazy(() => import("#/components/TipTapEditor"))
 
@@ -286,22 +287,25 @@ function EntryDetailPage() {
 						>
 							Status
 						</label>
-						<select
-							id="entry-status"
-							value={status}
-							onChange={(e) =>
-								handleStatusChange(
-									e.target.value as "draft" | "published" | "archived",
-								)
-							}
-							className="rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
-						>
-							<option value="draft">Draft</option>
-							<option value="published">Published</option>
-							<option value="archived">Archived</option>
-						</select>
+						<div className="max-w-xs">
+							<Select
+								id="entry-status"
+								value={status}
+								onChange={(val) =>
+									handleStatusChange(
+										val as "draft" | "published" | "archived",
+									)
+								}
+								options={[
+									{ value: "draft", label: "Draft" },
+									{ value: "published", label: "Published" },
+									{ value: "archived", label: "Archived" },
+								]}
+								isSearchable={false}
+							/>
+						</div>
 						{updateStatusMutation.isPending && (
-							<span className="ml-2 text-xs text-[var(--sea-ink-soft)]">
+							<span className="mt-1 block text-xs text-[var(--sea-ink-soft)]">
 								Updating...
 							</span>
 						)}

@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import Select from "#/components/Select"
 
 export const Route = createFileRoute("/admin/entries/")({
 	component: EntriesPage,
@@ -77,22 +78,23 @@ function EntriesPage() {
 					))}
 				</div>
 
-				<select
-					value={filterCollection ?? ""}
-					onChange={(e) =>
-						setFilterCollection(
-							e.target.value ? Number(e.target.value) : undefined,
-						)
-					}
-					className="rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-1.5 text-sm text-[var(--sea-ink)] outline-none"
-				>
-					<option value="">All Collections</option>
-					{collections?.map((col) => (
-						<option key={col.id} value={col.id}>
-							{col.name}
-						</option>
-					))}
-				</select>
+				<div className="min-w-[200px]">
+					<Select
+						value={filterCollection?.toString() ?? ""}
+						onChange={(val) =>
+							setFilterCollection(
+								val ? Number(val) : undefined,
+							)
+						}
+						options={(collections ?? []).map((col) => ({
+							value: String(col.id),
+							label: col.name,
+						}))}
+						placeholder="All Collections"
+						isClearable
+						size="sm"
+					/>
+				</div>
 			</div>
 
 			{isLoading ? (

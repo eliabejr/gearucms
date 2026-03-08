@@ -9,6 +9,8 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
+const isCloudflare = process.env.CF_PAGES === '1' || process.env.DEPLOY_TARGET === 'cloudflare'
+
 const config = defineConfig({
   plugins: [
     devtools(),
@@ -17,7 +19,20 @@ const config = defineConfig({
       outdir: './src/paraglide',
       strategy: ['url', 'baseLocale'],
     }),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      // For Cloudflare deployment, set DEPLOY_TARGET=cloudflare
+      ...(isCloudflare
+        ? {
+            preset: 'cloudflare-module',
+            alias: { '#/db/index': '#/db/index.d1' },
+            rollupConfig: {
+              external: [/^@sentry\//, 'better-sqlite3'],
+            },
+          }
+        : {
+            rollupConfig: { external: [/^@sentry\//] },
+          }),
+    }),
     tsconfigPaths({ projects: ['./tsconfig.json'] }),
     tailwindcss(),
     tanstackStart(),

@@ -1,5 +1,8 @@
 import { relations } from "drizzle-orm"
 import {
+	user,
+	session,
+	account,
 	collections,
 	collectionFields,
 	entries,
@@ -10,6 +13,29 @@ import {
 	aiJobItems,
 	aiUsageLog,
 } from "./schema"
+
+// ─── Better Auth Relations ──────────────────────────────────
+
+export const userRelations = relations(user, ({ many }) => ({
+	sessions: many(session),
+	accounts: many(account),
+}))
+
+export const sessionRelations = relations(session, ({ one }) => ({
+	user: one(user, {
+		fields: [session.userId],
+		references: [user.id],
+	}),
+}))
+
+export const accountRelations = relations(account, ({ one }) => ({
+	user: one(user, {
+		fields: [account.userId],
+		references: [user.id],
+	}),
+}))
+
+// ─── CMS Relations ─────────────────────────────────────────
 
 export const collectionsRelations = relations(collections, ({ many }) => ({
 	fields: many(collectionFields),

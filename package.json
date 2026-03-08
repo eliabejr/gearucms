@@ -18,7 +18,13 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:setup": "dotenv -e .env.local -- tsx scripts/setup-dev-db.ts",
+    "db:setup:seed": "dotenv -e .env.local -- tsx scripts/setup-dev-db.ts --seed",
+    "db:setup:reset": "dotenv -e .env.local -- tsx scripts/setup-dev-db.ts --reset --seed",
+    "build:cf": "DEPLOY_TARGET=cloudflare vite build",
+    "d1:migrate:local": "npx wrangler d1 migrations apply eli-cms-db --local",
+    "d1:migrate:remote": "npx wrangler d1 migrations apply eli-cms-db --remote"
   },
   "dependencies": {
     "@faker-js/faker": "^10.3.0",
@@ -64,6 +70,7 @@
     "papaparse": "^5.5.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-select": "^5.9.0",
     "streamdown": "^2.3.0",
     "superjson": "^2.2.2",
     "tailwindcss": "^4.1.18",
@@ -89,7 +96,9 @@
     "typescript": "^5.7.2",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "wrangler": "^4.14.0",
+    "@cloudflare/workers-types": "^4.20250303.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

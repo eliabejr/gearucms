@@ -4,6 +4,7 @@ import { useTRPC } from "#/integrations/trpc/react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { useState, lazy, Suspense } from "react"
 import SeoAnalyzer from "#/components/SeoAnalyzer"
+import Select from "#/components/Select"
 
 const TipTapEditor = lazy(() => import("#/components/TipTapEditor"))
 
@@ -263,30 +264,25 @@ function NewEntryPage() {
 							>
 								Collection
 							</label>
-							<select
+							<Select
 								id="collection-select"
-								value={selectedCollectionId ?? ""}
-								onChange={(e) =>
+								value={selectedCollectionId?.toString() ?? ""}
+								onChange={(val) =>
 									handleCollectionChange(
-										e.target.value
-											? Number(e.target.value)
-											: undefined,
+										val ? Number(val) : undefined,
 									)
 								}
-								required
-								className="w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)] transition"
-							>
-								<option value="">Select a collection</option>
-								{collectionsLoading ? (
-									<option disabled>Loading...</option>
-								) : (
-									collections?.map((col) => (
-										<option key={col.id} value={col.id}>
-											{col.name}
-										</option>
-									))
-								)}
-							</select>
+								options={
+									collectionsLoading
+										? []
+										: (collections ?? []).map((col) => ({
+												value: String(col.id),
+												label: col.name,
+											}))
+								}
+								placeholder="Select a collection"
+								isClearable
+							/>
 						</div>
 
 						<div>

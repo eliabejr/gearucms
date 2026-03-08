@@ -3,6 +3,7 @@ import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react"
 import { useTRPC } from "#/integrations/trpc/react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import Select from "#/components/Select"
 
 export const Route = createFileRoute("/admin/collections/$id")({
 	component: CollectionDetailPage,
@@ -213,22 +214,21 @@ function CollectionDetailPage() {
 								className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
 							/>
 						</div>
-						<div>
+						<div className="min-w-[160px]">
 							<label htmlFor="field-type" className="mb-1 block text-xs font-medium text-[var(--sea-ink-soft)]">
 								Type
 							</label>
-							<select
+							<Select
 								id="field-type"
 								value={newFieldType}
-								onChange={(e) => setNewFieldType(e.target.value)}
-								className="rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
-							>
-								{FIELD_TYPES.map((t) => (
-									<option key={t.value} value={t.value}>
-										{t.label}
-									</option>
-								))}
-							</select>
+								onChange={(val) => setNewFieldType(val)}
+								options={FIELD_TYPES.map((t) => ({
+									value: t.value,
+									label: t.label,
+								}))}
+								isSearchable={false}
+								size="sm"
+							/>
 						</div>
 						<label className="flex items-center gap-2 text-sm text-[var(--sea-ink-soft)]">
 							<input
