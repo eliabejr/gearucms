@@ -1,0 +1,411 @@
+/*
+ * Admin panel styles — professional slate/neutral palette with blue accent.
+ * Fully scoped to `.admin-layout` so public site CSS is untouched.
+ */
+
+/* ─────────────────────────────────────────────
+   Light palette
+───────────────────────────────────────────── */
+
+.admin-layout {
+	--sea-ink: #0f172a;
+	--sea-ink-soft: #64748b;
+
+	--lagoon: #3b82f6;
+	--lagoon-deep: #2563eb;
+
+	--palm: #1e40af;
+
+	--sand: #ffffff;
+	--foam: #f8fafc;
+
+	--surface: #ffffff;
+	--surface-strong: #ffffff;
+
+	--line: #e2e8f0;
+
+	--inset-glint: transparent;
+
+	--kicker: #64748b;
+
+	--bg-base: #f1f5f9;
+
+	--header-bg: rgba(255, 255, 255, 0.95);
+
+	--chip-bg: #f1f5f9;
+	--chip-line: #e2e8f0;
+
+	--link-bg-hover: #f8fafc;
+
+	background:
+		radial-gradient(circle at 20% 0%, rgba(59, 130, 246, 0.05), transparent 40%),
+		var(--bg-base);
+}
+
+/* ─────────────────────────────────────────────
+   Dark palette
+───────────────────────────────────────────── */
+
+:root[data-theme="dark"] .admin-layout,
+:root.dark .admin-layout {
+	--sea-ink: #f1f5f9;
+	--sea-ink-soft: #cbd5e1;
+
+	--lagoon: #93c5fd;
+	--lagoon-deep: #60a5fa;
+
+	--palm: #bfdbfe;
+
+	--sand: #0f172a;
+	--foam: #0f172a;
+
+	--surface: #1e293b;
+	--surface-strong: #334155;
+
+	--line: #475569;
+
+	--inset-glint: transparent;
+
+	--kicker: #cbd5e1;
+
+	--bg-base: #020617;
+
+	--header-bg: rgba(15, 23, 42, 0.95);
+
+	--chip-bg: #1e293b;
+	--chip-line: #475569;
+
+	--link-bg-hover: #1e293b;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .admin-layout {
+		--sea-ink: #f1f5f9;
+		--sea-ink-soft: #cbd5e1;
+
+		--lagoon: #93c5fd;
+		--lagoon-deep: #60a5fa;
+
+		--palm: #bfdbfe;
+
+		--sand: #0f172a;
+		--foam: #0f172a;
+
+		--surface: #1e293b;
+		--surface-strong: #334155;
+
+		--line: #475569;
+
+		--inset-glint: transparent;
+
+		--kicker: #cbd5e1;
+
+		--bg-base: #020617;
+
+		--header-bg: rgba(15, 23, 42, 0.95);
+
+		--chip-bg: #1e293b;
+		--chip-line: #475569;
+
+		--link-bg-hover: #1e293b;
+	}
+}
+
+/* Dark mode overrides (system preference) */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .admin-layout .sidebar a.nav-link-active {
+		background: rgba(147, 197, 253, 0.15);
+	}
+
+	:root:not([data-theme="light"]) .admin-layout .sidebar .sign-out-btn:hover {
+		background: rgba(185, 28, 28, 0.25);
+		color: #f87171;
+	}
+}
+
+/* ─────────────────────────────────────────────
+   Typography
+───────────────────────────────────────────── */
+
+.admin-layout h1,
+.admin-layout h2,
+.admin-layout h3,
+.admin-layout h4 {
+	color: var(--sea-ink);
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.admin-layout p {
+	color: var(--sea-ink-soft);
+}
+
+/* ─────────────────────────────────────────────
+   Cards / Panels
+───────────────────────────────────────────── */
+
+.admin-layout .island-shell {
+	background: var(--surface);
+	border: 1px solid var(--line);
+
+	border-radius: 14px;
+
+	padding: 28px;
+
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.04),
+		0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.admin-layout .feature-card {
+	background: var(--surface);
+
+	border: 1px solid var(--line);
+	border-radius: 12px;
+
+	padding: 20px;
+
+	transition: all 0.2s ease;
+
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.03),
+		0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.admin-layout .feature-card:hover {
+	transform: translateY(-2px);
+
+	border-color: var(--line);
+
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ─────────────────────────────────────────────
+   Forms
+───────────────────────────────────────────── */
+
+.admin-layout .form-group {
+	margin-bottom: 20px;
+}
+
+.admin-layout label {
+	display: block;
+
+	font-weight: 500;
+
+	margin-bottom: 6px;
+
+	color: var(--sea-ink);
+}
+
+.admin-layout .field-description {
+	font-size: 12px;
+
+	margin-top: 6px;
+
+	color: var(--sea-ink-soft);
+}
+
+/* Inputs */
+
+.admin-layout input,
+.admin-layout textarea,
+.admin-layout select {
+	width: 100%;
+
+	padding: 12px 14px;
+
+	font-size: 14px;
+
+	border-radius: 10px;
+
+	border: 1px solid var(--line);
+
+	background: var(--foam);
+
+	color: var(--sea-ink);
+
+	transition:
+		border 0.15s ease,
+		box-shadow 0.15s ease,
+		background 0.15s ease;
+}
+
+.admin-layout input:focus,
+.admin-layout textarea:focus,
+.admin-layout select:focus {
+	outline: none;
+
+	border-color: var(--lagoon);
+
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Dark tweak */
+
+:root[data-theme="dark"] .admin-layout input,
+:root[data-theme="dark"] .admin-layout textarea,
+:root[data-theme="dark"] .admin-layout select {
+	background: #0f172a;
+}
+
+/* ─────────────────────────────────────────────
+   Sidebar Navigation
+───────────────────────────────────────────── */
+
+.admin-layout .sidebar a {
+	display: flex;
+
+	align-items: center;
+
+	gap: 10px;
+
+	padding: 10px 14px;
+
+	border-radius: 8px;
+
+	color: var(--sea-ink-soft);
+
+	transition: all 0.15s ease;
+}
+
+.admin-layout .sidebar a:hover {
+	background: var(--link-bg-hover);
+
+	color: var(--sea-ink);
+}
+
+.admin-layout .sidebar a.active {
+	background: rgba(59, 130, 246, 0.1);
+
+	color: var(--lagoon-deep);
+
+	font-weight: 500;
+}
+
+/* Dark mode: stronger selected state and Sign Out hover */
+:root[data-theme="dark"] .admin-layout .sidebar a.nav-link-active,
+:root.dark .admin-layout .sidebar a.nav-link-active {
+	background: rgba(147, 197, 253, 0.15);
+}
+
+:root[data-theme="dark"] .admin-layout .sidebar .sign-out-btn:hover,
+:root.dark .admin-layout .sidebar .sign-out-btn:hover {
+	background: rgba(185, 28, 28, 0.25);
+	color: #f87171;
+}
+
+/* ─────────────────────────────────────────────
+   Tabs
+───────────────────────────────────────────── */
+
+.admin-layout .admin-tabs {
+	display: flex;
+
+	gap: 6px;
+
+	padding: 6px;
+
+	border-radius: 10px;
+
+	background: var(--chip-bg);
+}
+
+.admin-layout .admin-tabs button {
+	padding: 8px 14px;
+
+	border-radius: 8px;
+
+	font-size: 14px;
+
+	border: none;
+
+	background: transparent;
+
+	color: var(--sea-ink-soft);
+
+	cursor: pointer;
+}
+
+.admin-layout .admin-tabs button.active {
+	background: var(--surface);
+
+	color: var(--sea-ink);
+
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ─────────────────────────────────────────────
+   Buttons
+───────────────────────────────────────────── */
+
+.admin-layout .btn-primary {
+	background: var(--lagoon);
+
+	color: white;
+
+	border: none;
+
+	border-radius: 10px;
+
+	padding: 10px 16px;
+
+	font-weight: 500;
+
+	cursor: pointer;
+
+	transition: all 0.15s ease;
+}
+
+.admin-layout .btn-primary:hover {
+	background: var(--lagoon-deep);
+
+	transform: translateY(-1px);
+}
+
+.admin-layout .btn-primary:active {
+	transform: translateY(0);
+}
+
+/* ─────────────────────────────────────────────
+   Links
+───────────────────────────────────────────── */
+
+.admin-layout a {
+	color: var(--lagoon-deep);
+	text-decoration: none;
+}
+
+.admin-layout a:hover {
+	color: var(--lagoon);
+}
+
+/* ─────────────────────────────────────────────
+   Selection
+───────────────────────────────────────────── */
+
+.admin-layout ::selection {
+	background: rgba(59, 130, 246, 0.18);
+}
+
+/* ─────────────────────────────────────────────
+   Scrollbar
+───────────────────────────────────────────── */
+
+.admin-layout ::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+.admin-layout ::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.admin-layout ::-webkit-scrollbar-thumb {
+	background: var(--line);
+	border-radius: 3px;
+}
+
+.admin-layout ::-webkit-scrollbar-thumb:hover {
+	background: var(--sea-ink-soft);
+}

@@ -4,6 +4,7 @@ import {
 	Link,
 	redirect,
 	useMatchRoute,
+	useNavigate,
 } from "@tanstack/react-router"
 import {
 	LayoutDashboard,
@@ -17,12 +18,15 @@ import {
 	LogOut,
 	Menu,
 	X,
+	ExternalLink,
 } from "lucide-react"
 import { useState } from "react"
 import { authClient } from "#/lib/auth-client"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest } from "@tanstack/react-start/server"
 import { auth } from "#/lib/auth"
+import ThemeToggle from "#/components/ThemeToggle"
+import "#/styles/admin.css"
 
 const getSession = createServerFn({ method: "GET" }).handler(async () => {
 	const request = getRequest()
@@ -54,29 +58,42 @@ const navItems = [
 function AdminLayout() {
 	const [sidebarOpen, setSidebarOpen] = useState(false)
 	const matchRoute = useMatchRoute()
+	const navigate = useNavigate()
 	const { data: session } = authClient.useSession()
 
+	const handleSignOut = () => {
+		authClient.signOut({
+			fetchOptions: {
+				onSuccess: () => {
+					navigate({ to: "/login" })
+				},
+			},
+		})
+	}
+
 	return (
-		<div className="flex h-screen bg-[var(--foam)]">
+		<div className="admin-layout flex h-screen bg-[var(--bg-base)]">
 			{/* Mobile overlay */}
 			{sidebarOpen && (
-				<div
-					className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+				<button
+					type="button"
+					aria-label="Close sidebar"
+					className="fixed inset-0 z-30 cursor-default bg-black/40 lg:hidden"
 					onClick={() => setSidebarOpen(false)}
-					onKeyDown={() => {}}
 				/>
 			)}
 
 			{/* Sidebar */}
 			<aside
-				className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[var(--line)] bg-[var(--sand)] transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+				className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-[var(--line)] bg-[var(--sand)] transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
 			>
-				<div className="flex items-center justify-between border-b border-[var(--line)] px-4 py-4">
+				{/* Brand */}
+				<div className="flex items-center justify-between border-b border-[var(--line)] px-4 py-3.5">
 					<Link
 						to="/admin"
-						className="flex items-center gap-2 text-lg font-bold text-[var(--sea-ink)] no-underline"
+						className="flex items-center gap-2.5 text-[15px] font-bold tracking-tight text-[var(--sea-ink)] no-underline"
 					>
-						<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--lagoon)] text-sm font-bold text-white">
+						<span className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--lagoon)] text-xs font-bold text-white">
 							C
 						</span>
 						CMS
@@ -84,14 +101,15 @@ function AdminLayout() {
 					<button
 						type="button"
 						onClick={() => setSidebarOpen(false)}
-						className="rounded-lg p-1 text-[var(--sea-ink-soft)] hover:bg-[var(--foam)] lg:hidden"
+						className="rounded-md p-1 text-[var(--sea-ink-soft)] hover:bg-[var(--foam)] lg:hidden"
 					>
-						<X size={20} />
+						<X size={18} />
 					</button>
 				</div>
 
-				<nav className="flex-1 overflow-y-auto p-3">
-					<ul className="flex flex-col gap-1">
+				{/* Navigation */}
+				<nav className="flex-1 overflow-y-auto px-2.5 py-3">
+					<ul className="flex flex-col gap-0.5">
 						{navItems.map((item) => {
 							const isActive = item.exact
 								? matchRoute({ to: item.to, fuzzy: false })
@@ -102,13 +120,13 @@ function AdminLayout() {
 									<Link
 										to={item.to}
 										onClick={() => setSidebarOpen(false)}
-										className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium no-underline transition ${
+										className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium no-underline transition ${
 											isActive
-												? "bg-[var(--lagoon)] text-white"
+												? "nav-link-active bg-[color-mix(in_oklab,var(--lagoon)_12%,transparent)] text-[var(--lagoon)]"
 												: "text-[var(--sea-ink-soft)] hover:bg-[var(--foam)] hover:text-[var(--sea-ink)]"
 										}`}
 									>
-										<item.icon size={18} />
+										<item.icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
 										{item.label}
 									</Link>
 								</li>
@@ -117,29 +135,35 @@ function AdminLayout() {
 					</ul>
 				</nav>
 
-				<div className="border-t border-[var(--line)] p-3">
-					<div className="mb-2 flex items-center gap-2 px-3 py-1">
-						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--lagoon)] text-xs font-bold text-white">
+				{/* Footer */}
+				<div className="border-t border-[var(--line)] px-2.5 py-3">
+					{/* User */}
+					<div className="mb-1 flex items-center gap-2.5 rounded-md px-2.5 py-2">
+						<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--line)] text-[11px] font-bold text-[var(--sea-ink-soft)]">
 							{session?.user?.name?.[0]?.toUpperCase() ?? "U"}
 						</div>
-						<div className="flex-1 truncate text-sm text-[var(--sea-ink)]">
+						<div className="flex-1 truncate text-[13px] font-medium text-[var(--sea-ink)]">
 							{session?.user?.name ?? session?.user?.email ?? "User"}
 						</div>
 					</div>
-					<button
-						type="button"
-						onClick={() => authClient.signOut()}
-						className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--sea-ink-soft)] transition hover:bg-[var(--foam)] hover:text-red-600"
-					>
-						<LogOut size={18} />
-						Sign Out
-					</button>
+
+					{/* Actions */}
+					<ThemeToggle />
 					<Link
 						to="/"
-						className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--foam)]"
+						className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--foam)] hover:text-[var(--sea-ink)]"
 					>
+						<ExternalLink size={16} />
 						View Site
 					</Link>
+					<button
+						type="button"
+						onClick={handleSignOut}
+						className="sign-out-btn flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sea-ink-soft)] transition hover:bg-red-50 hover:text-red-600"
+					>
+						<LogOut size={16} />
+						Sign Out
+					</button>
 				</div>
 			</aside>
 
@@ -150,12 +174,12 @@ function AdminLayout() {
 					<button
 						type="button"
 						onClick={() => setSidebarOpen(true)}
-						className="rounded-lg p-1.5 text-[var(--sea-ink-soft)] hover:bg-[var(--foam)]"
+						className="rounded-md p-1.5 text-[var(--sea-ink-soft)] hover:bg-[var(--foam)]"
 					>
-						<Menu size={20} />
+						<Menu size={18} />
 					</button>
 					<span className="text-sm font-semibold text-[var(--sea-ink)]">
-						CMS Admin
+						CMS
 					</span>
 				</header>
 
