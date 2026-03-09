@@ -2,7 +2,7 @@ import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useGearuAdmin } from "../context"
-import Select from "../components/Select"
+import Select from "../components/select"
 
 const FIELD_TYPES = [
 	{ value: "text", label: "Text" },

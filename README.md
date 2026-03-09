@@ -1,285 +1,203 @@
-Welcome to your new TanStack Start app! 
+# Gearu
 
-# Getting Started
+Open-source headless CMS that installs inside your React project. Built on TanStack Start, Drizzle ORM, tRPC, and Better Auth.
 
-To run this application:
+## Quick Start
 
-```bash
-npm install
-npm run dev
-```
-
-# Building For Production
-
-To build this application for production:
+### 1. Install
 
 ```bash
-npm run build
+pnpm add @gearu/core @gearu/admin
 ```
 
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+### 2. Install plugins (optional)
 
 ```bash
-npm run test
+pnpm add @gearu/plugin-analytics @gearu/plugin-leads
 ```
 
-## Styling
+### 3. Create config
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+Create `gearu.config.ts` at your project root:
 
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-## Linting & Formatting
-
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
-
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-
-# TanStack Chat Application
-
-Am example chat application built with TanStack Start, TanStack Store, and Claude AI.
-
-## .env Updates
-
-```env
-ANTHROPIC_API_KEY=your_anthropic_api_key
-```
-
-## ✨ Features
-
-### AI Capabilities
-- 🤖 Powered by Claude 3.5 Sonnet 
-- 📝 Rich markdown formatting with syntax highlighting
-- 🎯 Customizable system prompts for tailored AI behavior
-- 🔄 Real-time message updates and streaming responses (coming soon)
-
-### User Experience
-- 🎨 Modern UI with Tailwind CSS and Lucide icons
-- 🔍 Conversation management and history
-- 🔐 Secure API key management
-- 📋 Markdown rendering with code highlighting
-
-### Technical Features
-- 📦 Centralized state management with TanStack Store
-- 🔌 Extensible architecture for multiple AI providers
-- 🛠️ TypeScript for type safety
-
-## Architecture
-
-### Tech Stack
-- **Frontend Framework**: TanStack Start
-- **Routing**: TanStack Router
-- **State Management**: TanStack Store
-- **Styling**: Tailwind CSS
-- **AI Integration**: Anthropic's Claude API
-
-# Paraglide i18n
-
-This add-on wires up ParaglideJS for localized routing and message formatting.
-
-- Messages live in `project.inlang/messages`.
-- URLs are localized through the Paraglide Vite plugin and router `rewrite` hooks.
-- Run the dev server or build to regenerate the `src/paraglide` outputs.
-
-
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   npx -y @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
-
-```bash
-npx -y @better-auth/cli migrate
-```
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
+```ts
+export default {
+  database: "file:./dev.db",
+  plugins: ["@gearu/plugin-leads", "@gearu/plugin-analytics"],
 }
 ```
 
-## API Routes
+### 4. Set up the database
 
-You can create API routes by using the `server` property in your route definitions:
+Add the Gearu schema to your Drizzle config:
+
+```ts
+// drizzle.config.ts
+import { defineConfig } from "drizzle-kit"
+
+export default defineConfig({
+  schema: [
+    "./node_modules/@gearu/core/dist/schema/index.js",
+    // Add plugin schemas as needed
+  ],
+  out: "./drizzle",
+  dialect: "sqlite",
+  dbCredentials: { url: "./dev.db" },
+})
+```
+
+Or import the tables directly in your existing schema:
+
+```ts
+// src/db/schema.ts
+export * from "@gearu/core"
+```
+
+Run migrations:
+
+```bash
+pnpm drizzle-kit push
+```
+
+### 5. Set up tRPC
+
+Add the Gearu routers to your tRPC app router:
+
+```ts
+// src/trpc/router.ts
+import { createTRPCRouter } from "./init"
+import { collectionsRouter, entriesRouter, mediaRouter, commentsRouter, settingsRouter, aiRouter } from "./routers"
+
+// Import plugin routers
+import { createAnalyticsRouter } from "@gearu/plugin-analytics"
+import { createLeadsRouter } from "@gearu/plugin-leads"
+
+export const appRouter = createTRPCRouter({
+  collections: collectionsRouter,
+  entries: entriesRouter,
+  media: mediaRouter,
+  comments: commentsRouter,
+  settings: settingsRouter,
+  ai: aiRouter,
+  analytics: createAnalyticsRouter(db, { publicProcedure, protectedProcedure }),
+  leads: createLeadsRouter(db, { publicProcedure, protectedProcedure }),
+})
+```
+
+### 6. Add admin route
+
+Create a catch-all admin route that renders the Gearu admin panel:
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
+// src/routes/admin/route.tsx
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { createServerFn } from "@tanstack/react-start"
 
-export const Route = createFileRoute('/api/hello')({
+const getSession = createServerFn({ method: "GET" }).handler(async () => {
+  const { auth } = await import("./lib/auth")
+  const request = getRequest()
+  return auth.api.getSession({ headers: request.headers })
+})
+
+export const Route = createFileRoute("/admin")({
+  beforeLoad: async () => {
+    const session = await getSession()
+    if (!session?.user) throw redirect({ to: "/login" })
+  },
+  component: () => <Outlet />,
+})
+```
+
+```tsx
+// src/routes/admin/$.tsx
+import { createFileRoute, Link, useNavigate, useLocation } from "@tanstack/react-router"
+import { GearuAdmin } from "@gearu/admin"
+import "@gearu/admin/styles.css"
+import { useTRPC } from "../integrations/trpc/react"
+import { authClient } from "../lib/auth-client"
+
+// Import plugins
+import leadsPlugin from "@gearu/plugin-leads"
+import analyticsPlugin from "@gearu/plugin-analytics"
+
+export const Route = createFileRoute("/admin/$")({
+  component: AdminPage,
+})
+
+function AdminPage() {
+  const { data: session } = authClient.useSession()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  return (
+    <GearuAdmin
+      pathname={location.pathname}
+      basePath="/admin"
+      plugins={[leadsPlugin, analyticsPlugin]}
+      Link={Link}
+      useTRPC={useTRPC}
+      session={session}
+      onSignOut={() => authClient.signOut({ fetchOptions: { onSuccess: () => navigate({ to: "/login" }) } })}
+      navigate={(path) => navigate({ to: path })}
+    />
+  )
+}
+```
+
+### 7. Add SEO routes (optional)
+
+Gearu provides utilities for robots.txt, sitemaps, and OG images:
+
+```ts
+// src/routes/api/robots.ts
+import { createFileRoute } from "@tanstack/react-router"
+import { getSiteUrl, generateRobotsTxt } from "@gearu/core"
+
+export const Route = createFileRoute("/api/robots")({
   server: {
     handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
+      GET: async () => {
+        const body = generateRobotsTxt(getSiteUrl())
+        return new Response(body, { headers: { "Content-Type": "text/plain" } })
+      },
     },
   },
 })
 ```
 
-## Data Fetching
+### 8. Environment variables
 
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
+```env
+DATABASE_URL=file:./dev.db
+BETTER_AUTH_SECRET=your-secret-here
+SITE_URL=http://localhost:3000
 ```
 
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
+## Features
 
-# Demo files
+- **Collections & Entries** — Define content types with custom fields (text, richtext, number, boolean, image, date, relation)
+- **Media Manager** — Upload and manage files with drag-and-drop
+- **Comments** — Built-in comment system with moderation (pending, approved, rejected)
+- **SEO** — Meta tags, JSON-LD, sitemap, robots.txt, OG image generation, SEO scoring
+- **AI Writer** — Bulk article generation from CSV with configurable system prompts and models
+- **Content Versioning** — Track and restore content revisions
+- **Settings** — Site metadata, AI provider config, tracking script injection
 
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
+## Plugins
 
-# Learn More
+| Plugin | Package | Description |
+|--------|---------|-------------|
+| Analytics | `@gearu/plugin-analytics` | Page view tracking, top pages, traffic sources, UTM campaigns |
+| Leads | `@gearu/plugin-leads` | Dynamic form builder, lead capture with UTM tracking, CSV export |
 
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+## Tech Stack
 
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+- [TanStack Start](https://tanstack.com/start) — Full-stack React framework
+- [Drizzle ORM](https://orm.drizzle.team) — Type-safe SQL with SQLite/D1
+- [tRPC](https://trpc.io) — End-to-end type-safe APIs
+- [Better Auth](https://www.better-auth.com) — Authentication
+- [Tailwind CSS](https://tailwindcss.com) — Styling
+
+## License
+
+MIT

@@ -1,8 +1,6 @@
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core"
 import { sql } from "drizzle-orm"
 
-// ─── Better Auth (users, sessions, accounts) ────────────────
-
 export const user = sqliteTable("user", {
 	id: text().primaryKey(),
 	name: text().notNull(),
@@ -53,8 +51,6 @@ export const verification = sqliteTable("verification", {
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 })
 
-// ─── Existing ────────────────────────────────────────────────
-
 export const todos = sqliteTable("todos", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	title: text().notNull(),
@@ -62,8 +58,6 @@ export const todos = sqliteTable("todos", {
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── Collections (dynamic content types) ─────────────────────
 
 export const collections = sqliteTable("collections", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -82,12 +76,10 @@ export const collectionFields = sqliteTable("collection_fields", {
 		.references(() => collections.id, { onDelete: "cascade" }),
 	name: text().notNull(),
 	slug: text().notNull(),
-	type: text().notNull(), // text | richtext | number | boolean | image | relation | date
+	type: text().notNull(),
 	required: integer({ mode: "boolean" }).default(false),
 	sortOrder: integer("sort_order").default(0),
 })
-
-// ─── Entries (content items) ─────────────────────────────────
 
 export const entries = sqliteTable("entries", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -96,8 +88,7 @@ export const entries = sqliteTable("entries", {
 		.references(() => collections.id, { onDelete: "cascade" }),
 	title: text().notNull(),
 	slug: text().notNull(),
-	status: text().notNull().default("draft"), // draft | published | archived
-	// SEO fields
+	status: text().notNull().default("draft"),
 	metaTitle: text("meta_title"),
 	metaDescription: text("meta_description"),
 	ogImage: text("og_image"),
@@ -121,22 +112,18 @@ export const entryFields = sqliteTable("entry_fields", {
 	value: text(),
 })
 
-// ─── Content versioning ──────────────────────────────────────
-
 export const entryVersions = sqliteTable("entry_versions", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	entryId: integer("entry_id")
 		.notNull()
 		.references(() => entries.id, { onDelete: "cascade" }),
 	versionNumber: integer("version_number").notNull(),
-	dataSnapshot: text("data_snapshot").notNull(), // JSON of all field values
+	dataSnapshot: text("data_snapshot").notNull(),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
 	createdBy: text("created_by"),
 })
-
-// ─── Media ───────────────────────────────────────────────────
 
 export const media = sqliteTable("media", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -151,8 +138,6 @@ export const media = sqliteTable("media", {
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── Analytics ───────────────────────────────────────────────
 
 export const pageViews = sqliteTable("page_views", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -170,8 +155,6 @@ export const pageViews = sqliteTable("page_views", {
 	),
 })
 
-// ─── Comments ────────────────────────────────────────────────
-
 export const comments = sqliteTable("comments", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	entryId: integer("entry_id")
@@ -180,18 +163,16 @@ export const comments = sqliteTable("comments", {
 	authorName: text("author_name").notNull(),
 	authorEmail: text("author_email").notNull(),
 	content: text().notNull(),
-	status: text().notNull().default("pending"), // pending | approved | rejected
+	status: text().notNull().default("pending"),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
 })
 
-// ─── Tracking scripts ───────────────────────────────────────
-
 export const trackingScripts = sqliteTable("tracking_scripts", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	name: text().notNull(),
-	location: text().notNull(), // head | body_start | body_end
+	location: text().notNull(),
 	script: text().notNull(),
 	active: integer({ mode: "boolean" }).default(true),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
@@ -199,16 +180,14 @@ export const trackingScripts = sqliteTable("tracking_scripts", {
 	),
 })
 
-// ─── AI batch jobs ───────────────────────────────────────────
-
 export const aiJobs = sqliteTable("ai_jobs", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
-	status: text().notNull().default("pending"), // pending | processing | completed | failed
-	csvData: text("csv_data").notNull(), // JSON string of parsed CSV rows
+	status: text().notNull().default("pending"),
+	csvData: text("csv_data").notNull(),
 	collectionId: integer("collection_id")
 		.notNull()
 		.references(() => collections.id),
-	imageMode: text("image_mode").notNull().default("none"), // gemini | openai | unsplash | pexels | none
+	imageMode: text("image_mode").notNull().default("none"),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
@@ -222,7 +201,7 @@ export const aiJobItems = sqliteTable("ai_job_items", {
 		.references(() => aiJobs.id, { onDelete: "cascade" }),
 	title: text().notNull(),
 	scheduleDays: integer("schedule_days").notNull().default(0),
-	status: text().notNull().default("pending"), // pending | generating_text | generating_image | saving | completed | failed
+	status: text().notNull().default("pending"),
 	entryId: integer("entry_id").references(() => entries.id),
 	generatedText: text("generated_text"),
 	generatedImageUrl: text("generated_image_url"),
@@ -235,33 +214,29 @@ export const aiJobItems = sqliteTable("ai_job_items", {
 	completedAt: integer("completed_at", { mode: "timestamp" }),
 })
 
-// ─── AI usage tracking ──────────────────────────────────────
-
 export const aiUsageLog = sqliteTable("ai_usage_log", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	jobId: integer("job_id").references(() => aiJobs.id, { onDelete: "cascade" }),
 	jobItemId: integer("job_item_id").references(() => aiJobItems.id, {
 		onDelete: "cascade",
 	}),
-	provider: text().notNull(), // anthropic | openai | gemini
+	provider: text().notNull(),
 	model: text().notNull(),
-	type: text().notNull(), // text | image
+	type: text().notNull(),
 	tokensInput: integer("tokens_input").default(0),
 	tokensOutput: integer("tokens_output").default(0),
-	costEstimate: text("cost_estimate"), // stored as string for decimal precision
+	costEstimate: text("cost_estimate"),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── Lead capture ───────────────────────────────────────────
 
 export const leadForms = sqliteTable("lead_forms", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	name: text().notNull(),
 	slug: text().notNull().unique(),
 	tag: text().notNull().default("general"),
-	fields: text().notNull().default("[]"), // JSON: [{ name, label, type, required, placeholder }]
+	fields: text().notNull().default("[]"),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
@@ -277,7 +252,7 @@ export const leads = sqliteTable("leads", {
 		.references(() => leadForms.id, { onDelete: "cascade" }),
 	name: text().notNull(),
 	email: text().notNull(),
-	data: text().default("{}"), // JSON: { fieldName: value }
+	data: text().default("{}"),
 	formTag: text("form_tag"),
 	utmSource: text("utm_source"),
 	utmMedium: text("utm_medium"),
@@ -289,8 +264,6 @@ export const leads = sqliteTable("leads", {
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── Site settings (key-value) ──────────────────────────────
 
 export const siteSettings = sqliteTable("site_settings", {
 	key: text().primaryKey(),

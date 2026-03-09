@@ -1,8 +1,6 @@
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core"
 import { sql } from "drizzle-orm"
 
-// ─── Better Auth (users, sessions, accounts) ────────────────
-
 export const user = sqliteTable("user", {
 	id: text().primaryKey(),
 	name: text().notNull(),
@@ -53,8 +51,6 @@ export const verification = sqliteTable("verification", {
 	updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 })
 
-// ─── Collections (dynamic content types) ─────────────────────
-
 export const collections = sqliteTable("collections", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	name: text().notNull(),
@@ -76,8 +72,6 @@ export const collectionFields = sqliteTable("collection_fields", {
 	required: integer({ mode: "boolean" }).default(false),
 	sortOrder: integer("sort_order").default(0),
 })
-
-// ─── Entries (content items) ─────────────────────────────────
 
 export const entries = sqliteTable("entries", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -123,8 +117,6 @@ export const entryVersions = sqliteTable("entry_versions", {
 	createdBy: text("created_by"),
 })
 
-// ─── Media ───────────────────────────────────────────────────
-
 export const media = sqliteTable("media", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	filename: text().notNull(),
@@ -138,8 +130,6 @@ export const media = sqliteTable("media", {
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── Comments ────────────────────────────────────────────────
 
 export const comments = sqliteTable("comments", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -155,8 +145,6 @@ export const comments = sqliteTable("comments", {
 	),
 })
 
-// ─── Tracking scripts ─────────────────────────────────────────
-
 export const trackingScripts = sqliteTable("tracking_scripts", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	name: text().notNull(),
@@ -167,8 +155,6 @@ export const trackingScripts = sqliteTable("tracking_scripts", {
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── AI batch jobs ───────────────────────────────────────────
 
 export const aiJobs = sqliteTable("ai_jobs", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -220,8 +206,6 @@ export const aiUsageLog = sqliteTable("ai_usage_log", {
 		sql`(unixepoch())`,
 	),
 })
-
-// ─── Site settings (key-value) ──────────────────────────────
 
 export const siteSettings = sqliteTable("site_settings", {
 	key: text().primaryKey(),

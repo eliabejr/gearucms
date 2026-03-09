@@ -1,7 +1,7 @@
 import { ArrowLeft, Eye } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { useGearuAdmin } from "../context"
-import ContentRenderer from "../components/ContentRenderer"
+import ContentRenderer from "../components/content-renderer"
 
 export function EntryPreview() {
 	const { useTRPC, Link, basePath, params } = useGearuAdmin()

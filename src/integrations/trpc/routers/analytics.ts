@@ -5,6 +5,7 @@ import { db } from "#/db/index"
 import { pageViews } from "#/db/schema"
 import type { TRPCRouterRecord } from "@trpc/server"
 
+/** tRPC router for page view recording and analytics dashboard queries. */
 export const analyticsRouter = {
 	recordPageView: publicProcedure
 		.input(

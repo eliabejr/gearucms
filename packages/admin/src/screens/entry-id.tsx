@@ -2,8 +2,8 @@ import { ArrowLeft, Save, History, RotateCcw, ChevronDown, Search } from "lucide
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect, Suspense } from "react"
 import { useGearuAdmin } from "../context"
-import Select from "../components/Select"
-import SeoAnalyzer from "../components/SeoAnalyzer"
+import Select from "../components/select"
+import SeoAnalyzer from "../components/seo-analyzer"
 
 export function EntryId() {
 	const { useTRPC, basePath, navigate, params, RichTextEditor } = useGearuAdmin()

@@ -2,7 +2,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useGearuAdmin } from "../context"
-import Select from "../components/Select"
+import Select from "../components/select"
 
 export function EntriesIndex() {
 	const { useTRPC, Link, basePath } = useGearuAdmin()

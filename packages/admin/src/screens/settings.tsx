@@ -15,7 +15,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect } from "react"
 import { useGearuAdmin } from "../context"
-import Select from "../components/Select"
+import Select from "../components/select"
 
 type SettingsTab = "general" | "ai" | "scripts"
 const AI_PROVIDERS = [
@@ -153,6 +153,7 @@ function AiProviderSettings() {
 	const { data: aiConfig, isLoading } = useQuery(trpc.settings.getAiConfig.queryOptions())
 	const [provider, setProvider] = useState("anthropic")
 	const [model, setModel] = useState("")
+	const [systemPrompt, setSystemPrompt] = useState("")
 	const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
 	const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({})
 	useEffect(() => {
@@ -160,6 +161,7 @@ function AiProviderSettings() {
 		if (c) {
 			setProvider(c.ai_default_provider ?? "anthropic")
 			setModel(c.ai_default_model ?? "")
+			setSystemPrompt(c.ai_system_prompt ?? "")
 			const keys: Record<string, string> = {}
 			for (const p of API_KEY_PROVIDERS) {
 				const val = c[`ai_api_key_${p.key}`]
@@ -173,7 +175,7 @@ function AiProviderSettings() {
 			onSuccess: () => queryClient.invalidateQueries({ queryKey: trpc.settings.getAiConfig.queryKey() }),
 		}),
 	)
-	const handleSave = () => saveMutation.mutate({ provider, model, apiKeys } as any)
+	const handleSave = () => saveMutation.mutate({ provider, model, systemPrompt, apiKeys } as any)
 	const selectedProvider = AI_PROVIDERS.find((p) => p.value === provider)
 	const models = selectedProvider?.models ?? []
 	const inputClass = "w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)] transition"
@@ -195,6 +197,11 @@ function AiProviderSettings() {
 					<div>
 						<label htmlFor="ai-model" className="mb-1 block text-sm font-medium text-[var(--sea-ink)]">Model</label>
 						<Select id="ai-model" value={model} onChange={(val) => setModel(val)} options={models.map((m) => ({ value: m, label: m }))} placeholder="Select a model..." />
+					</div>
+					<div>
+						<label htmlFor="ai-system-prompt" className="mb-1 block text-sm font-medium text-[var(--sea-ink)]">System Prompt</label>
+						<textarea id="ai-system-prompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} rows={6} placeholder="Custom system prompt for AI article generation. Leave empty for the default prompt." className={`${inputClass} resize-y font-mono text-xs`} />
+						<p className="mt-1 text-xs text-[var(--sea-ink-soft)]">Customize the instructions given to the AI when generating articles.</p>
 					</div>
 				</div>
 			</div>

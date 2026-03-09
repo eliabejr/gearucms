@@ -1,11 +1,12 @@
 import type { ComponentType } from "react"
 import { OPTIONAL_ADMIN_MODULES } from "@gearu/core"
-import { GearuAdminLayout } from "./GearuAdminLayout"
+import { GearuAdminLayout } from "./gearu-admin-layout"
 import { GearuAdminProvider } from "./context"
-import { getCoreNavItems } from "./coreNav"
+import { getCoreNavItems } from "./core-nav"
 import { getCoreRoutes } from "./routes"
 import type { GearuPlugin } from "@gearu/core"
 
+/** Props for the top-level Gearu admin shell. */
 export interface GearuAdminProps {
 	pathname: string
 	basePath: string
@@ -34,11 +35,9 @@ function matchRoute(
 	internalPath: string,
 	routes: { path: string; Component: ComponentType }[],
 ): { Component: ComponentType; params?: Record<string, string> } | null {
-	// Exact match
 	const exact = routes.find((r) => r.path === internalPath)
 	if (exact) return { Component: exact.Component }
 
-	// Param match: /entries/123 -> path /entries/:id
 	const segments = internalPath.split("/").filter(Boolean)
 	for (const route of routes) {
 		const routeSegments = route.path.split("/").filter(Boolean)
@@ -58,6 +57,7 @@ function matchRoute(
 	return null
 }
 
+/** Renders the Gearu admin panel with routing, layout, and plugin integration. */
 export function GearuAdmin({
 	pathname,
 	basePath,
@@ -78,7 +78,6 @@ export function GearuAdmin({
 	const pluginRoutes = plugins
 		.filter((p): p is GearuPlugin & { admin: NonNullable<GearuPlugin["admin"]> } => !!p.admin)
 		.map((p) => ({ path: p.admin.route.path, Component: p.admin.route.Component }))
-	// Plugin routes first so installed leads/analytics plugins override core missing-module fallbacks
 	const allRoutes = [...pluginRoutes, ...coreRoutes]
 	const match = matchRoute(internalPath, allRoutes)
 

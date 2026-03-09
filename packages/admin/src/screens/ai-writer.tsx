@@ -16,7 +16,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useRef, useCallback } from "react"
 import Papa from "papaparse"
 import { useGearuAdmin } from "../context"
-import Select from "../components/Select"
+import Select from "../components/select"
 
 type CsvRow = { title: string; schedule: number }
 type ImageMode = "gemini" | "openai" | "unsplash" | "pexels" | "none"

@@ -16,8 +16,6 @@ import {
 	leads,
 } from "./schema"
 
-// ─── Better Auth Relations ──────────────────────────────────
-
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
@@ -36,8 +34,6 @@ export const accountRelations = relations(account, ({ one }) => ({
 		references: [user.id],
 	}),
 }))
-
-// ─── CMS Relations ─────────────────────────────────────────
 
 export const collectionsRelations = relations(collections, ({ many }) => ({
 	fields: many(collectionFields),
@@ -122,8 +118,6 @@ export const aiUsageLogRelations = relations(aiUsageLog, ({ one }) => ({
 		references: [aiJobItems.id],
 	}),
 }))
-
-// ─── Lead Capture Relations ─────────────────────────────────
 
 export const leadFormsRelations = relations(leadForms, ({ many }) => ({
 	leads: many(leads),

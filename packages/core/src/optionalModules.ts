@@ -9,6 +9,7 @@ export const OPTIONAL_ADMIN_MODULES = [
 
 export type OptionalAdminModule = (typeof OPTIONAL_ADMIN_MODULES)[number]
 
+/** Finds an optional admin module definition by its path. */
 export function getOptionalModuleByPath(path: string): OptionalAdminModule | undefined {
 	return OPTIONAL_ADMIN_MODULES.find((m) => m.path === path)
 }

@@ -11,11 +11,7 @@ import {
 } from "lucide-react"
 import type { GearuAdminNavItem } from "./types"
 
-/**
- * Default core nav items for the admin (Dashboard, Collections, Entries, Media, Comments, Leads, Analytics, Settings, AI Writer).
- * Leads and Analytics show in nav always; their routes show the plugin screen when installed or MissingModule when not.
- * Host may override by passing plugins that provide their own nav items (which replace these for matching paths).
- */
+/** Returns the default admin sidebar navigation items. */
 export function getCoreNavItems(): GearuAdminNavItem[] {
 	return [
 		{ path: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },

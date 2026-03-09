@@ -34,6 +34,7 @@ export interface GearuAdminContextValue {
 
 const GearuAdminContext = createContext<GearuAdminContextValue | null>(null)
 
+/** Provides the Gearu admin context to child components. */
 export function GearuAdminProvider({
 	value,
 	children,
@@ -48,6 +49,7 @@ export function GearuAdminProvider({
 	)
 }
 
+/** Returns the Gearu admin context. Must be used within GearuAdminProvider. */
 export function useGearuAdmin() {
 	const ctx = useContext(GearuAdminContext)
 	if (!ctx) throw new Error("useGearuAdmin must be used within GearuAdminProvider")

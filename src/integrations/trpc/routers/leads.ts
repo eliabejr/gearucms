@@ -21,12 +21,11 @@ const fieldSchema = z.object({
 	type: z.enum(["text", "email", "phone", "textarea", "select", "number", "url"]),
 	required: z.boolean().default(false),
 	placeholder: z.string().optional(),
-	options: z.string().optional(), // comma-separated for select type
+	options: z.string().optional(),
 })
 
+/** tRPC router for lead form management, lead tracking, and public form submission. */
 export const leadsRouter = {
-	// ─── Admin: Form Management ─────────────────────────────────
-
 	listForms: protectedProcedure.query(async () => {
 		const forms = await db
 			.select()
@@ -97,8 +96,6 @@ export const leadsRouter = {
 			return { success: true }
 		}),
 
-	// ─── Admin: Lead Management ─────────────────────────────────
-
 	listLeads: protectedProcedure
 		.input(
 			z
@@ -141,8 +138,6 @@ export const leadsRouter = {
 			return { success: true }
 		}),
 
-	// ─── Public: Form Rendering + Submission ────────────────────
-
 	getFormBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ input }) => {
@@ -179,7 +174,6 @@ export const leadsRouter = {
 			}),
 		)
 		.mutation(async ({ input }) => {
-			// 1. Fetch the form
 			const [form] = await db
 				.select()
 				.from(leadForms)
@@ -193,7 +187,6 @@ export const leadsRouter = {
 				})
 			}
 
-			// 2. Validate name (always required)
 			if (!input.name.trim()) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
@@ -201,7 +194,6 @@ export const leadsRouter = {
 				})
 			}
 
-			// 3. Validate email (always required + format)
 			if (!input.email.trim()) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
@@ -216,7 +208,6 @@ export const leadsRouter = {
 				})
 			}
 
-			// 4. Validate dynamic required fields
 			const formFields = JSON.parse(form.fields) as z.infer<
 				typeof fieldSchema
 			>[]
@@ -232,7 +223,6 @@ export const leadsRouter = {
 				}
 			}
 
-			// 5. Insert lead
 			const [lead] = await db
 				.insert(leads)
 				.values({

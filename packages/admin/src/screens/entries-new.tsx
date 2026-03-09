@@ -2,8 +2,8 @@ import { ArrowLeft, Save, FileText, ChevronDown, Search } from "lucide-react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { useState, Suspense } from "react"
 import { useGearuAdmin } from "../context"
-import Select from "../components/Select"
-import SeoAnalyzer from "../components/SeoAnalyzer"
+import Select from "../components/select"
+import SeoAnalyzer from "../components/seo-analyzer"
 
 export function EntriesNew() {
 	const { useTRPC, basePath, navigate, RichTextEditor } = useGearuAdmin()

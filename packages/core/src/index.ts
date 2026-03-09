@@ -14,7 +14,34 @@ export type { GearuContext } from "./context"
 export * from "./schema/index"
 export * from "./schema/relations"
 export {
-	OPTIONAL_ADMIN_MODULES,
-	getOptionalModuleByPath,
-	type OptionalAdminModule,
+  OPTIONAL_ADMIN_MODULES,
+  getOptionalModuleByPath,
+  type OptionalAdminModule,
 } from "./optionalModules"
+
+// SEO & content utilities
+export {
+  getSiteUrl,
+  generateMetaTags,
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd,
+  generateOrganizationJsonLd,
+  stripHtml,
+  extractExcerpt,
+  extractFirstImage,
+  calculateSeoScore,
+  autoInternalLink,
+  pingIndexNow,
+  pingSitemap,
+  isCrawler,
+  prepareEntryMeta,
+  prepareEntryJsonLd,
+} from "./seo"
+export type { SeoMeta, SeoCheck, SeoScore } from "./seo"
+
+// Robots, sitemap, OG image generators
+export { generateRobotsTxt } from "./robots"
+export type { RobotsTxtOptions } from "./robots"
+export { generateSitemapXml } from "./sitemap"
+export type { SitemapEntry } from "./sitemap"
+export { generateOgImageSvg, escapeXml } from "./og-image"

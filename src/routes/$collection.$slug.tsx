@@ -5,12 +5,10 @@ import ContentRenderer from "#/components/ContentRenderer"
 import Breadcrumbs from "#/components/Breadcrumbs"
 import StructuredData from "#/components/StructuredData"
 import {
-	generateMetaTags,
-	generateArticleJsonLd,
-	extractExcerpt,
-	extractFirstImage,
 	getSiteUrl,
-} from "#/lib/seo"
+	prepareEntryMeta,
+	prepareEntryJsonLd,
+} from "@gearu/core"
 
 export const Route = createFileRoute("/$collection/$slug")({
 	loader: async ({ params, context }) => {
@@ -24,55 +22,10 @@ export const Route = createFileRoute("/$collection/$slug")({
 	},
 	head: ({ loaderData }) => {
 		const entry = loaderData?.entry
-		if (!entry) {
-			return {
-				meta: [{ title: "Not Found" }],
-			}
-		}
+		if (!entry) return { meta: [{ title: "Not Found" }] }
 
 		const siteUrl = getSiteUrl()
-		const collectionSlug = entry.collection?.slug ?? ""
-		const canonical = `${siteUrl}/${collectionSlug}/${entry.slug}`
-
-		// Extract description from richtext/text fields
-		const contentFields = (entry.fields ?? [])
-			.filter(
-				(f) =>
-					f.field.type === "richtext" || f.field.type === "text",
-			)
-			.map((f) => f.value ?? "")
-			.join(" ")
-
-		const description =
-			entry.metaDescription || extractExcerpt(contentFields)
-
-		// Extract first image
-		const imageField = (entry.fields ?? []).find(
-			(f) => f.field.type === "image" && f.value,
-		)
-		const ogImage =
-			entry.ogImage ||
-			imageField?.value ||
-			extractFirstImage(contentFields)
-
-		const metaTitle = entry.metaTitle || entry.title
-
-		return {
-			meta: generateMetaTags({
-				title: metaTitle,
-				description,
-				canonical,
-				ogImage: ogImage ?? undefined,
-				ogType: "article",
-				publishedAt: entry.publishedAt
-					? new Date(entry.publishedAt).toISOString()
-					: undefined,
-				modifiedAt: entry.updatedAt
-					? new Date(entry.updatedAt).toISOString()
-					: undefined,
-				section: entry.collection?.name,
-			}),
-		}
+		return { meta: prepareEntryMeta(entry, siteUrl) }
 	},
 	component: ContentPage,
 })
@@ -117,37 +70,12 @@ function ContentPage() {
 
 	const siteUrl = getSiteUrl()
 	const collectionSlug = entry.collection?.slug ?? collection
-	const canonical = `${siteUrl}/${collectionSlug}/${entry.slug}`
-
-	const contentFields = (entry.fields ?? [])
-		.filter(
-			(f) => f.field.type === "richtext" || f.field.type === "text",
-		)
-		.map((f) => f.value ?? "")
-		.join(" ")
-
-	const description =
-		entry.metaDescription || extractExcerpt(contentFields)
+	const articleJsonLd = prepareEntryJsonLd(entry, siteUrl)
 
 	const fieldData = (entry.fields ?? []).map((ef) => ({
 		field: ef.field,
 		value: ef.value,
 	}))
-
-	// Article JSON-LD
-	const articleJsonLd = generateArticleJsonLd({
-		title: entry.metaTitle || entry.title,
-		description,
-		url: canonical,
-		publishedAt: entry.publishedAt
-			? new Date(entry.publishedAt).toISOString()
-			: new Date().toISOString(),
-		modifiedAt: entry.updatedAt
-			? new Date(entry.updatedAt).toISOString()
-			: undefined,
-		image: entry.ogImage ?? undefined,
-		section: entry.collection?.name,
-	})
 
 	return (
 		<main className="page-wrap px-4 py-12">

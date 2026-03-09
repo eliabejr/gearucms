@@ -1,23 +1,23 @@
 import type { ComponentType } from "react"
-import { Dashboard } from "./screens/Dashboard"
-import { Collections } from "./screens/Collections"
-import { CollectionId } from "./screens/CollectionId"
-import { EntriesIndex } from "./screens/EntriesIndex"
-import { EntriesNew } from "./screens/EntriesNew"
-import { EntryId } from "./screens/EntryId"
-import { EntryPreview } from "./screens/EntryPreview"
-import { Media } from "./screens/Media"
-import { Comments } from "./screens/Comments"
-import { Settings } from "./screens/Settings"
-import { AiWriter } from "./screens/AiWriter"
-import { MissingModule } from "./screens/MissingModule"
+import { Dashboard } from "./screens/dashboard"
+import { Collections } from "./screens/collections"
+import { CollectionId } from "./screens/collection-id"
+import { EntriesIndex } from "./screens/entries-index"
+import { EntriesNew } from "./screens/entries-new"
+import { EntryId } from "./screens/entry-id"
+import { EntryPreview } from "./screens/entry-preview"
+import { Media } from "./screens/media"
+import { Comments } from "./screens/comments"
+import { Settings } from "./screens/settings"
+import { AiWriter } from "./screens/ai-writer"
+import { MissingModule } from "./screens/missing-module"
 
 export interface AdminRoute {
 	path: string
 	Component: ComponentType
 }
 
-/** Core admin routes (path is relative to basePath, e.g. / or /collections). Optional module routes (leads, analytics) are fallbacks when plugin not installed. */
+/** Core admin routes. Optional module routes fall back to MissingModule when the plugin is not installed. */
 export function getCoreRoutes(): AdminRoute[] {
 	return [
 		{ path: "/", Component: Dashboard },

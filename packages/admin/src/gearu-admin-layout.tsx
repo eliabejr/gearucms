@@ -26,6 +26,7 @@ export interface GearuAdminLayoutProps {
   brandName?: string
 }
 
+/** Renders the admin shell layout with sidebar navigation and responsive mobile menu. */
 export function GearuAdminLayout({
   basePath,
   pathname,
