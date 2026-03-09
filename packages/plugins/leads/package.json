@@ -1,0 +1,44 @@
+{
+  "name": "@gearu/plugin-leads",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "@gearu/admin": "workspace:*",
+    "@gearu/core": "workspace:*",
+    "@tanstack/react-query": "*",
+    "@trpc/react-query": "*"
+  },
+  "devDependencies": {
+    "@gearu/admin": "workspace:*",
+    "@gearu/core": "workspace:*",
+    "@trpc/server": "^11.11.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -14,27 +14,15 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as ApiSitemapRouteImport } from './routes/api/sitemap'
 import { Route as ApiRobotsRouteImport } from './routes/api/robots'
 import { Route as ApiOgImageRouteImport } from './routes/api/og-image'
-import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
-import { Route as AdminMediaRouteImport } from './routes/admin/media'
-import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
-import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
-import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
-import { Route as AdminAiWriterRouteImport } from './routes/admin/ai-writer'
+import { Route as AdminSplatRouteImport } from './routes/admin/$'
 import { Route as CollectionSlugRouteImport } from './routes/$collection.$slug'
-import { Route as AdminEntriesIndexRouteImport } from './routes/admin/entries/index'
-import { Route as AdminCollectionsIndexRouteImport } from './routes/admin/collections/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiArticleRouteImport } from './routes/api/ai/article'
-import { Route as AdminEntriesNewRouteImport } from './routes/admin/entries/new'
-import { Route as AdminEntriesIdRouteImport } from './routes/admin/entries/$id'
-import { Route as AdminCollectionsIdRouteImport } from './routes/admin/collections/$id'
-import { Route as AdminEntriesIdPreviewRouteImport } from './routes/admin/entries/$id.preview'
 
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
@@ -61,11 +49,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
 const ApiUploadRoute = ApiUploadRouteImport.update({
   id: '/api/upload',
   path: '/api/upload',
@@ -86,50 +69,15 @@ const ApiOgImageRoute = ApiOgImageRouteImport.update({
   path: '/api/og-image',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminMediaRoute = AdminMediaRouteImport.update({
-  id: '/media',
-  path: '/media',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminLeadsRoute = AdminLeadsRouteImport.update({
-  id: '/leads',
-  path: '/leads',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminCommentsRoute = AdminCommentsRouteImport.update({
-  id: '/comments',
-  path: '/comments',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminAiWriterRoute = AdminAiWriterRouteImport.update({
-  id: '/ai-writer',
-  path: '/ai-writer',
+const AdminSplatRoute = AdminSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const CollectionSlugRoute = CollectionSlugRouteImport.update({
   id: '/$collection/$slug',
   path: '/$collection/$slug',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AdminEntriesIndexRoute = AdminEntriesIndexRouteImport.update({
-  id: '/entries/',
-  path: '/entries/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminCollectionsIndexRoute = AdminCollectionsIndexRouteImport.update({
-  id: '/collections/',
-  path: '/collections/',
-  getParentRoute: () => AdminRouteRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
@@ -146,26 +94,6 @@ const ApiAiArticleRoute = ApiAiArticleRouteImport.update({
   path: '/api/ai/article',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminEntriesNewRoute = AdminEntriesNewRouteImport.update({
-  id: '/entries/new',
-  path: '/entries/new',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminEntriesIdRoute = AdminEntriesIdRouteImport.update({
-  id: '/entries/$id',
-  path: '/entries/$id',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminCollectionsIdRoute = AdminCollectionsIdRouteImport.update({
-  id: '/collections/$id',
-  path: '/collections/$id',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminEntriesIdPreviewRoute = AdminEntriesIdPreviewRouteImport.update({
-  id: '/preview',
-  path: '/preview',
-  getParentRoute: () => AdminEntriesIdRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -174,53 +102,30 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/$collection/$slug': typeof CollectionSlugRoute
-  '/admin/ai-writer': typeof AdminAiWriterRoute
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/comments': typeof AdminCommentsRoute
-  '/admin/leads': typeof AdminLeadsRoute
-  '/admin/media': typeof AdminMediaRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/$': typeof AdminSplatRoute
   '/api/og-image': typeof ApiOgImageRoute
   '/api/robots': typeof ApiRobotsRoute
   '/api/sitemap': typeof ApiSitemapRoute
   '/api/upload': typeof ApiUploadRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/collections/$id': typeof AdminCollectionsIdRoute
-  '/admin/entries/$id': typeof AdminEntriesIdRouteWithChildren
-  '/admin/entries/new': typeof AdminEntriesNewRoute
   '/api/ai/article': typeof ApiAiArticleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/admin/collections/': typeof AdminCollectionsIndexRoute
-  '/admin/entries/': typeof AdminEntriesIndexRoute
-  '/admin/entries/$id/preview': typeof AdminEntriesIdPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/$collection/$slug': typeof CollectionSlugRoute
-  '/admin/ai-writer': typeof AdminAiWriterRoute
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/comments': typeof AdminCommentsRoute
-  '/admin/leads': typeof AdminLeadsRoute
-  '/admin/media': typeof AdminMediaRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/$': typeof AdminSplatRoute
   '/api/og-image': typeof ApiOgImageRoute
   '/api/robots': typeof ApiRobotsRoute
   '/api/sitemap': typeof ApiSitemapRoute
   '/api/upload': typeof ApiUploadRoute
-  '/admin': typeof AdminIndexRoute
-  '/admin/collections/$id': typeof AdminCollectionsIdRoute
-  '/admin/entries/$id': typeof AdminEntriesIdRouteWithChildren
-  '/admin/entries/new': typeof AdminEntriesNewRoute
   '/api/ai/article': typeof ApiAiArticleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/admin/collections': typeof AdminCollectionsIndexRoute
-  '/admin/entries': typeof AdminEntriesIndexRoute
-  '/admin/entries/$id/preview': typeof AdminEntriesIdPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -230,26 +135,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/$collection/$slug': typeof CollectionSlugRoute
-  '/admin/ai-writer': typeof AdminAiWriterRoute
-  '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/comments': typeof AdminCommentsRoute
-  '/admin/leads': typeof AdminLeadsRoute
-  '/admin/media': typeof AdminMediaRoute
-  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/$': typeof AdminSplatRoute
   '/api/og-image': typeof ApiOgImageRoute
   '/api/robots': typeof ApiRobotsRoute
   '/api/sitemap': typeof ApiSitemapRoute
   '/api/upload': typeof ApiUploadRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/collections/$id': typeof AdminCollectionsIdRoute
-  '/admin/entries/$id': typeof AdminEntriesIdRouteWithChildren
-  '/admin/entries/new': typeof AdminEntriesNewRoute
   '/api/ai/article': typeof ApiAiArticleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/admin/collections/': typeof AdminCollectionsIndexRoute
-  '/admin/entries/': typeof AdminEntriesIndexRoute
-  '/admin/entries/$id/preview': typeof AdminEntriesIdPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -260,53 +153,30 @@ export interface FileRouteTypes {
     | '/login'
     | '/mcp'
     | '/$collection/$slug'
-    | '/admin/ai-writer'
-    | '/admin/analytics'
-    | '/admin/comments'
-    | '/admin/leads'
-    | '/admin/media'
-    | '/admin/settings'
+    | '/admin/$'
     | '/api/og-image'
     | '/api/robots'
     | '/api/sitemap'
     | '/api/upload'
-    | '/admin/'
-    | '/admin/collections/$id'
-    | '/admin/entries/$id'
-    | '/admin/entries/new'
     | '/api/ai/article'
     | '/api/auth/$'
     | '/api/trpc/$'
-    | '/admin/collections/'
-    | '/admin/entries/'
-    | '/admin/entries/$id/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/about'
     | '/login'
     | '/mcp'
     | '/$collection/$slug'
-    | '/admin/ai-writer'
-    | '/admin/analytics'
-    | '/admin/comments'
-    | '/admin/leads'
-    | '/admin/media'
-    | '/admin/settings'
+    | '/admin/$'
     | '/api/og-image'
     | '/api/robots'
     | '/api/sitemap'
     | '/api/upload'
-    | '/admin'
-    | '/admin/collections/$id'
-    | '/admin/entries/$id'
-    | '/admin/entries/new'
     | '/api/ai/article'
     | '/api/auth/$'
     | '/api/trpc/$'
-    | '/admin/collections'
-    | '/admin/entries'
-    | '/admin/entries/$id/preview'
   id:
     | '__root__'
     | '/'
@@ -315,26 +185,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/mcp'
     | '/$collection/$slug'
-    | '/admin/ai-writer'
-    | '/admin/analytics'
-    | '/admin/comments'
-    | '/admin/leads'
-    | '/admin/media'
-    | '/admin/settings'
+    | '/admin/$'
     | '/api/og-image'
     | '/api/robots'
     | '/api/sitemap'
     | '/api/upload'
-    | '/admin/'
-    | '/admin/collections/$id'
-    | '/admin/entries/$id'
-    | '/admin/entries/new'
     | '/api/ai/article'
     | '/api/auth/$'
     | '/api/trpc/$'
-    | '/admin/collections/'
-    | '/admin/entries/'
-    | '/admin/entries/$id/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -390,13 +248,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
     '/api/upload': {
       id: '/api/upload'
       path: '/api/upload'
@@ -425,46 +276,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOgImageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/media': {
-      id: '/admin/media'
-      path: '/media'
-      fullPath: '/admin/media'
-      preLoaderRoute: typeof AdminMediaRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/leads': {
-      id: '/admin/leads'
-      path: '/leads'
-      fullPath: '/admin/leads'
-      preLoaderRoute: typeof AdminLeadsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/comments': {
-      id: '/admin/comments'
-      path: '/comments'
-      fullPath: '/admin/comments'
-      preLoaderRoute: typeof AdminCommentsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/ai-writer': {
-      id: '/admin/ai-writer'
-      path: '/ai-writer'
-      fullPath: '/admin/ai-writer'
-      preLoaderRoute: typeof AdminAiWriterRouteImport
+    '/admin/$': {
+      id: '/admin/$'
+      path: '/$'
+      fullPath: '/admin/$'
+      preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/$collection/$slug': {
@@ -473,20 +289,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/$collection/$slug'
       preLoaderRoute: typeof CollectionSlugRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/admin/entries/': {
-      id: '/admin/entries/'
-      path: '/entries'
-      fullPath: '/admin/entries/'
-      preLoaderRoute: typeof AdminEntriesIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/collections/': {
-      id: '/admin/collections/'
-      path: '/collections'
-      fullPath: '/admin/collections/'
-      preLoaderRoute: typeof AdminCollectionsIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -509,77 +311,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiArticleRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/entries/new': {
-      id: '/admin/entries/new'
-      path: '/entries/new'
-      fullPath: '/admin/entries/new'
-      preLoaderRoute: typeof AdminEntriesNewRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/entries/$id': {
-      id: '/admin/entries/$id'
-      path: '/entries/$id'
-      fullPath: '/admin/entries/$id'
-      preLoaderRoute: typeof AdminEntriesIdRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/collections/$id': {
-      id: '/admin/collections/$id'
-      path: '/collections/$id'
-      fullPath: '/admin/collections/$id'
-      preLoaderRoute: typeof AdminCollectionsIdRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/entries/$id/preview': {
-      id: '/admin/entries/$id/preview'
-      path: '/preview'
-      fullPath: '/admin/entries/$id/preview'
-      preLoaderRoute: typeof AdminEntriesIdPreviewRouteImport
-      parentRoute: typeof AdminEntriesIdRoute
-    }
   }
 }
 
-interface AdminEntriesIdRouteChildren {
-  AdminEntriesIdPreviewRoute: typeof AdminEntriesIdPreviewRoute
-}
-
-const AdminEntriesIdRouteChildren: AdminEntriesIdRouteChildren = {
-  AdminEntriesIdPreviewRoute: AdminEntriesIdPreviewRoute,
-}
-
-const AdminEntriesIdRouteWithChildren = AdminEntriesIdRoute._addFileChildren(
-  AdminEntriesIdRouteChildren,
-)
-
 interface AdminRouteRouteChildren {
-  AdminAiWriterRoute: typeof AdminAiWriterRoute
-  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
-  AdminCommentsRoute: typeof AdminCommentsRoute
-  AdminLeadsRoute: typeof AdminLeadsRoute
-  AdminMediaRoute: typeof AdminMediaRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-  AdminCollectionsIdRoute: typeof AdminCollectionsIdRoute
-  AdminEntriesIdRoute: typeof AdminEntriesIdRouteWithChildren
-  AdminEntriesNewRoute: typeof AdminEntriesNewRoute
-  AdminCollectionsIndexRoute: typeof AdminCollectionsIndexRoute
-  AdminEntriesIndexRoute: typeof AdminEntriesIndexRoute
+  AdminSplatRoute: typeof AdminSplatRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminAiWriterRoute: AdminAiWriterRoute,
-  AdminAnalyticsRoute: AdminAnalyticsRoute,
-  AdminCommentsRoute: AdminCommentsRoute,
-  AdminLeadsRoute: AdminLeadsRoute,
-  AdminMediaRoute: AdminMediaRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
-  AdminIndexRoute: AdminIndexRoute,
-  AdminCollectionsIdRoute: AdminCollectionsIdRoute,
-  AdminEntriesIdRoute: AdminEntriesIdRouteWithChildren,
-  AdminEntriesNewRoute: AdminEntriesNewRoute,
-  AdminCollectionsIndexRoute: AdminCollectionsIndexRoute,
-  AdminEntriesIndexRoute: AdminEntriesIndexRoute,
+  AdminSplatRoute: AdminSplatRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

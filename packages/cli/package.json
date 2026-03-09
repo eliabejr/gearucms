@@ -1,0 +1,26 @@
+{
+  "name": "gearu",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "gearu": "./dist/cli.js",
+    "create-gearu": "./dist/create.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "update-notifier": "^7.0.0"
+  },
+  "devDependencies": {
+    "@gearu/core": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

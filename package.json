@@ -1,5 +1,6 @@
 {
-  "name": "eli-cms-template",
+  "name": "gearu-cms",
+  "author": "Eliabe Serafim Jr <eliabejr@proton.me>",
   "private": true,
   "type": "module",
   "imports": {
@@ -24,9 +25,15 @@
     "db:setup:reset": "dotenv -e .env.local -- tsx scripts/setup-dev-db.ts --reset --seed",
     "build:cf": "DEPLOY_TARGET=cloudflare vite build",
     "d1:migrate:local": "npx wrangler d1 migrations apply eli-cms-db --local",
-    "d1:migrate:remote": "npx wrangler d1 migrations apply eli-cms-db --remote"
+    "d1:migrate:remote": "npx wrangler d1 migrations apply eli-cms-db --remote",
+    "gearu": "gearu"
   },
   "dependencies": {
+    "@gearu/admin": "workspace:*",
+    "@gearu/core": "workspace:*",
+    "@gearu/plugin-analytics": "workspace:*",
+    "@gearu/plugin-leads": "workspace:*",
+    "gearu": "workspace:*",
     "@faker-js/faker": "^10.3.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@sentry/tanstackstart-react": "^10.42.0",

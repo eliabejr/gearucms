@@ -1,0 +1,42 @@
+{
+  "name": "@gearu/admin",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./styles/admin.css"
+  },
+  "files": ["dist", "styles"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "latest",
+    "lucide-react": "^0.577.0",
+    "papaparse": "^5.5.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-select": "^5.9.0"
+  },
+  "peerDependencies": {
+    "@gearu/core": "workspace:*",
+    "@trpc/react-query": "*"
+  },
+  "devDependencies": {
+    "@gearu/core": "workspace:*",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
