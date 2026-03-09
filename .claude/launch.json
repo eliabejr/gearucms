@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gearu-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@gearu/web", "dev"],
+      "port": 4000
+    }
+  ]
+}
