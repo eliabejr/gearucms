@@ -21,6 +21,7 @@ import { Route as ApiRobotsRouteImport } from './routes/api/robots'
 import { Route as ApiOgImageRouteImport } from './routes/api/og-image'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminMediaRouteImport } from './routes/admin/media'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminCommentsRouteImport } from './routes/admin/comments'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAiWriterRouteImport } from './routes/admin/ai-writer'
@@ -93,6 +94,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
 const AdminMediaRoute = AdminMediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminCommentsRoute = AdminCommentsRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-writer': typeof AdminAiWriterRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/og-image': typeof ApiOgImageRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/admin/ai-writer': typeof AdminAiWriterRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/og-image': typeof ApiOgImageRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/admin/ai-writer': typeof AdminAiWriterRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/comments': typeof AdminCommentsRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/og-image': typeof ApiOgImageRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/admin/ai-writer'
     | '/admin/analytics'
     | '/admin/comments'
+    | '/admin/leads'
     | '/admin/media'
     | '/admin/settings'
     | '/api/og-image'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin/ai-writer'
     | '/admin/analytics'
     | '/admin/comments'
+    | '/admin/leads'
     | '/admin/media'
     | '/admin/settings'
     | '/api/og-image'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/admin/ai-writer'
     | '/admin/analytics'
     | '/admin/comments'
+    | '/admin/leads'
     | '/admin/media'
     | '/admin/settings'
     | '/api/og-image'
@@ -427,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMediaRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/comments': {
       id: '/admin/comments'
       path: '/comments'
@@ -537,6 +556,7 @@ interface AdminRouteRouteChildren {
   AdminAiWriterRoute: typeof AdminAiWriterRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCommentsRoute: typeof AdminCommentsRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
   AdminMediaRoute: typeof AdminMediaRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -551,6 +571,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAiWriterRoute: AdminAiWriterRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
   AdminMediaRoute: AdminMediaRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,

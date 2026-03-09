@@ -12,6 +12,8 @@ import {
 	aiJobs,
 	aiJobItems,
 	aiUsageLog,
+	leadForms,
+	leads,
 } from "./schema"
 
 // ─── Better Auth Relations ──────────────────────────────────
@@ -118,5 +120,18 @@ export const aiUsageLogRelations = relations(aiUsageLog, ({ one }) => ({
 	jobItem: one(aiJobItems, {
 		fields: [aiUsageLog.jobItemId],
 		references: [aiJobItems.id],
+	}),
+}))
+
+// ─── Lead Capture Relations ─────────────────────────────────
+
+export const leadFormsRelations = relations(leadForms, ({ many }) => ({
+	leads: many(leads),
+}))
+
+export const leadsRelations = relations(leads, ({ one }) => ({
+	form: one(leadForms, {
+		fields: [leads.formId],
+		references: [leadForms.id],
 	}),
 }))

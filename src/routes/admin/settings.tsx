@@ -60,15 +60,15 @@ function SettingsPage() {
 			</h1>
 
 			{/* Tab bar */}
-			<div className="mb-6 flex gap-1 rounded-lg bg-[var(--sand)] p-1">
+			<div className="mb-6 flex gap-1 rounded-lg border-b border-[var(--line)]">
 				{tabs.map((tab) => (
 					<button
 						key={tab.id}
 						type="button"
 						onClick={() => setActiveTab(tab.id)}
-						className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${
+						className={`flex items-center gap-2 rounded-t-md px-4 py-2.5 text-sm font-medium transition ${
 							activeTab === tab.id
-								? "bg-white text-[var(--sea-ink)] shadow-sm"
+								? "border-b-2 border-[var(--lagoon)] text-[var(--sea-ink)]"
 								: "text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
 						}`}
 					>

@@ -6,6 +6,7 @@ import { analyticsRouter } from "./routers/analytics"
 import { commentsRouter } from "./routers/comments"
 import { settingsRouter } from "./routers/settings"
 import { aiRouter } from "./routers/ai"
+import { leadsRouter } from "./routers/leads"
 
 export const trpcRouter = createTRPCRouter({
 	collections: collectionsRouter,
@@ -15,6 +16,7 @@ export const trpcRouter = createTRPCRouter({
 	comments: commentsRouter,
 	settings: settingsRouter,
 	ai: aiRouter,
+	leads: leadsRouter,
 })
 
 export type TRPCRouter = typeof trpcRouter

@@ -19,13 +19,13 @@ import {
 	Menu,
 	X,
 	ExternalLink,
+	UserPlus,
 } from "lucide-react"
 import { useState } from "react"
 import { authClient } from "#/lib/auth-client"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest } from "@tanstack/react-start/server"
 import { auth } from "#/lib/auth"
-import ThemeToggle from "#/components/ThemeToggle"
 import "#/styles/admin.css"
 
 const getSession = createServerFn({ method: "GET" }).handler(async () => {
@@ -50,6 +50,7 @@ const navItems = [
 	{ to: "/admin/entries" as const, label: "Entries", icon: FileText },
 	{ to: "/admin/media" as const, label: "Media", icon: ImageIcon },
 	{ to: "/admin/comments" as const, label: "Comments", icon: MessageSquare },
+	{ to: "/admin/leads" as const, label: "Leads", icon: UserPlus },
 	{ to: "/admin/analytics" as const, label: "Analytics", icon: BarChart3 },
 	{ to: "/admin/settings" as const, label: "Settings", icon: Settings },
 	{ to: "/admin/ai-writer" as const, label: "AI Writer", icon: Sparkles },
@@ -85,23 +86,27 @@ function AdminLayout() {
 
 			{/* Sidebar */}
 			<aside
-				className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-[var(--line)] bg-[var(--sand)] transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+				className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 flex-col transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
 			>
 				{/* Brand */}
-				<div className="flex items-center justify-between border-b border-[var(--line)] px-4 py-3.5">
+				<div className="sidebar-brand flex items-center justify-between px-4 py-3.5">
 					<Link
 						to="/admin"
-						className="flex items-center gap-2.5 text-[15px] font-bold tracking-tight text-[var(--sea-ink)] no-underline"
+						className="flex items-center gap-2.5 no-underline"
 					>
-						<span className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--lagoon)] text-xs font-bold text-white">
-							C
+						<img
+							src="/gearu.svg"
+							alt="Gearu"
+							className="brand-logo h-5 w-5"
+						/>
+						<span className="text-[15px] font-bold tracking-tight">
+							Gearu
 						</span>
-						CMS
 					</Link>
 					<button
 						type="button"
 						onClick={() => setSidebarOpen(false)}
-						className="rounded-md p-1 text-[var(--sea-ink-soft)] hover:bg-[var(--foam)] lg:hidden"
+						className="mobile-close rounded-md p-1 lg:hidden"
 					>
 						<X size={18} />
 					</button>
@@ -121,9 +126,7 @@ function AdminLayout() {
 										to={item.to}
 										onClick={() => setSidebarOpen(false)}
 										className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium no-underline transition ${
-											isActive
-												? "nav-link-active bg-[color-mix(in_oklab,var(--lagoon)_12%,transparent)] text-[var(--lagoon)]"
-												: "text-[var(--sea-ink-soft)] hover:bg-[var(--foam)] hover:text-[var(--sea-ink)]"
+											isActive ? "nav-active" : ""
 										}`}
 									>
 										<item.icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
@@ -136,22 +139,21 @@ function AdminLayout() {
 				</nav>
 
 				{/* Footer */}
-				<div className="border-t border-[var(--line)] px-2.5 py-3">
+				<div className="sidebar-footer px-2.5 py-3">
 					{/* User */}
 					<div className="mb-1 flex items-center gap-2.5 rounded-md px-2.5 py-2">
-						<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--line)] text-[11px] font-bold text-[var(--sea-ink-soft)]">
+						<div className="user-avatar flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">
 							{session?.user?.name?.[0]?.toUpperCase() ?? "U"}
 						</div>
-						<div className="flex-1 truncate text-[13px] font-medium text-[var(--sea-ink)]">
+						<div className="user-name flex-1 truncate text-[13px] font-medium">
 							{session?.user?.name ?? session?.user?.email ?? "User"}
 						</div>
 					</div>
 
 					{/* Actions */}
-					<ThemeToggle />
 					<Link
 						to="/"
-						className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--foam)] hover:text-[var(--sea-ink)]"
+						className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium no-underline transition"
 					>
 						<ExternalLink size={16} />
 						View Site
@@ -159,7 +161,7 @@ function AdminLayout() {
 					<button
 						type="button"
 						onClick={handleSignOut}
-						className="sign-out-btn flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sea-ink-soft)] transition hover:bg-red-50 hover:text-red-600"
+						className="sign-out-btn flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition"
 					>
 						<LogOut size={16} />
 						Sign Out
@@ -174,13 +176,16 @@ function AdminLayout() {
 					<button
 						type="button"
 						onClick={() => setSidebarOpen(true)}
-						className="rounded-md p-1.5 text-[var(--sea-ink-soft)] hover:bg-[var(--foam)]"
+						className="rounded-md p-1.5 text-[var(--text-soft)] hover:bg-[var(--surface-soft)]"
 					>
 						<Menu size={18} />
 					</button>
-					<span className="text-sm font-semibold text-[var(--sea-ink)]">
-						CMS
-					</span>
+					<div className="flex items-center gap-2">
+						<img src="/gearu.svg" alt="Gearu" className="h-4 w-4" />
+						<span className="text-sm font-semibold text-[var(--text)]">
+							Gearu
+						</span>
+					</div>
 				</header>
 
 				<main className="flex-1 overflow-y-auto p-4 lg:p-6">
