@@ -1,7 +1,7 @@
 {
   "name": "gearu-cms",
   "author": "Eliabe Serafim Jr <eliabejr@proton.me>",
-  "private": true,
+  "private": false,
   "type": "module",
   "imports": {
     "#/*": "./src/*"
