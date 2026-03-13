@@ -35,8 +35,8 @@ export function EntriesIndex() {
 		{ value: "published", label: "Published" },
 		{ value: "archived", label: "Archived" },
 	]
-	const list = (entriesList as { id: number; title: string; status: string; updatedAt?: string; collection?: { name: string } }[]) ?? []
-	const cols = (collections as { id: number; name: string }[]) ?? []
+	const list = Array.isArray(entriesList) ? (entriesList as { id: number; title: string; status: string; updatedAt?: string; collection?: { name: string } }[]) : []
+	const cols = Array.isArray(collections) ? (collections as { id: number; name: string }[]) : []
 
 	return (
 		<div>

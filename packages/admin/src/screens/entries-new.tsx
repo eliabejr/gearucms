@@ -142,7 +142,7 @@ export function EntriesNew() {
 	}
 
 	const col = collection as { fields?: { id: number; name: string; type: string; required: boolean | null }[] } | undefined
-	const cols = (collections as { id: number; name: string }[]) ?? []
+	const cols = Array.isArray(collections) ? (collections as { id: number; name: string }[]) : []
 
 	return (
 		<div>

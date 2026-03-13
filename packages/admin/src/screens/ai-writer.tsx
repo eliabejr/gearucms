@@ -90,7 +90,7 @@ export function AiWriter() {
 	const jobStatusColor = (status: string) => { switch (status) { case "completed": return "bg-green-100 text-green-700"; case "processing": return "bg-blue-100 text-blue-700"; case "failed": return "bg-red-100 text-red-700"; default: return "bg-gray-100 text-gray-700" } }
 
 	const job = viewingJob as { id: number; status: string; collection?: { name: string }; items?: { id: number; title: string; status: string; error?: string; tokensUsed?: number }[]; createdAt?: string } | undefined
-	const cols = (collections as { id: number; name: string }[]) ?? []
+	const cols = Array.isArray(collections) ? (collections as { id: number; name: string }[]) : []
 	const jobsList = (jobs as { id: number; status: string; collection?: { name: string }; items?: unknown[]; createdAt?: string }[]) ?? []
 
 	if (viewingJobId && job) {

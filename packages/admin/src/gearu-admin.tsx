@@ -1,10 +1,10 @@
 import type { ComponentType } from "react"
-import { OPTIONAL_ADMIN_MODULES } from "@gearu/core"
+import { OPTIONAL_ADMIN_MODULES } from "@gearu/core/client"
 import { GearuAdminLayout } from "./gearu-admin-layout"
 import { GearuAdminProvider } from "./context"
 import { getCoreNavItems } from "./core-nav"
 import { getCoreRoutes } from "./routes"
-import type { GearuPlugin } from "@gearu/core"
+import type { GearuPlugin } from "@gearu/core/client"
 
 /** Props for the top-level Gearu admin shell. */
 export interface GearuAdminProps {
