@@ -1,5 +1,5 @@
 import type React from "react"
-import { definePlugin } from "@gearu/core"
+import { definePlugin } from "@gearu/core/client"
 import { BarChart3 } from "lucide-react"
 import { pageViews } from "./schema"
 import { createAnalyticsRouter } from "./router"

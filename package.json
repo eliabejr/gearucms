@@ -11,6 +11,7 @@
     "build": "vite build && cp instrument.server.mjs .output/server",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:auth-boundary": "pnpm --filter @gearu/core run build && pnpm --filter @gearu/core run check:auth-boundary",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",

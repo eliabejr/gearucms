@@ -2,6 +2,8 @@
 
 Open-source headless CMS that installs inside your React project. Built on TanStack Start, Drizzle ORM, tRPC, and Better Auth.
 
+**Breaking change (auth):** The single `@gearu/core/auth` entrypoint was removed. Use `@gearu/core/auth/client` for the auth client and `@gearu/core/auth/server` for auth and server helpers. See [Set up auth](#6-set-up-auth) and [Import boundaries](#import-boundaries-tanstack-start).
+
 ## Quick Start
 
 ### 1. Install
@@ -105,11 +107,16 @@ export const { TRPCProvider, useTRPC } = createGearuTRPCReact<AppRouter>()
 
 ### 6. Set up auth
 
-Gearu's auth tables are already part of `@gearu/core`, so you can create a reusable Better Auth instance from the package helper:
+Auth is split into **server-only** and **client-safe** entrypoints so TanStack Start (and other bundlers) never pull server code into the browser:
+
+- **`@gearu/core/auth/server`** — server only: `createGearuAuth`, `createGearuAuthServerHelpers`. Use in server modules, API routes, and server functions.
+- **`@gearu/core/auth/client`** — client safe: `createGearuAuthClient`. Use in client components and any code that runs in the browser.
+
+Do not import from a single mixed auth barrel; the package no longer exposes one.
 
 ```ts
-// src/lib/auth.ts
-import { createGearuAuth } from "@gearu/core/auth"
+// src/lib/auth.ts (server only)
+import { createGearuAuth } from "@gearu/core/auth/server"
 import { db } from "../db"
 
 export const auth = createGearuAuth(db, {
@@ -118,22 +125,22 @@ export const auth = createGearuAuth(db, {
 ```
 
 ```ts
-// src/lib/auth-client.ts
-import { createGearuAuthClient } from "@gearu/core/auth"
+// src/lib/auth-client.ts (client safe — use in routes/components that run in the browser)
+import { createGearuAuthClient } from "@gearu/core/auth/client"
 
 export const authClient = createGearuAuthClient()
 ```
 
 ```ts
-// src/lib/auth.server.ts
-import { createGearuAuthServerHelpers } from "@gearu/core/auth"
+// src/lib/auth.server.ts (server only)
+import { createGearuAuthServerHelpers } from "@gearu/core/auth/server"
 import { auth } from "./auth"
 
 export const { getSession, ensureSession } = createGearuAuthServerHelpers(auth)
 ```
 
 ```tsx
-// src/routes/api/auth/$.tsx
+// src/routes/api/auth/$.tsx (server only — catch-all for Better Auth)
 import { createFileRoute } from "@tanstack/react-router"
 import { auth } from "../../../lib/auth"
 
@@ -145,6 +152,70 @@ export const Route = createFileRoute("/api/auth/$")({
     },
   },
 })
+```
+
+Optional login/signup routes (client components that use `authClient`):
+
+```tsx
+// src/routes/login.tsx
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { authClient } from "../lib/auth-client"
+
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+})
+
+function LoginPage() {
+  const navigate = useNavigate()
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault()
+        const form = e.currentTarget
+        const email = (form.elements.namedItem("email") as HTMLInputElement).value
+        const password = (form.elements.namedItem("password") as HTMLInputElement).value
+        await authClient.signIn.email({ email, password, callbackURL: "/admin" })
+        navigate({ to: "/admin" })
+      }}
+    >
+      <input name="email" type="email" placeholder="Email" required />
+      <input name="password" type="password" placeholder="Password" required />
+      <button type="submit">Sign in</button>
+    </form>
+  )
+}
+```
+
+```tsx
+// src/routes/signup.tsx
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { authClient } from "../lib/auth-client"
+
+export const Route = createFileRoute("/signup")({
+  component: SignupPage,
+})
+
+function SignupPage() {
+  const navigate = useNavigate()
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault()
+        const form = e.currentTarget
+        const email = (form.elements.namedItem("email") as HTMLInputElement).value
+        const password = (form.elements.namedItem("password") as HTMLInputElement).value
+        const name = (form.elements.namedItem("name") as HTMLInputElement).value
+        await authClient.signUp.email({ email, password, name, callbackURL: "/admin" })
+        navigate({ to: "/admin" })
+      }}
+    >
+      <input name="name" type="text" placeholder="Name" required />
+      <input name="email" type="email" placeholder="Email" required />
+      <input name="password" type="password" placeholder="Password" required />
+      <button type="submit">Sign up</button>
+    </form>
+  )
+}
 ```
 
 ### 7. Add admin route
@@ -249,6 +320,19 @@ BETTER_AUTH_SECRET=your-secret-here
 SITE_URL=http://localhost:3000
 ```
 
+## Import boundaries (TanStack Start)
+
+To avoid server-only code ending up in the client bundle:
+
+- **Client-safe** (use in components and any code that runs in the browser):  
+  `@gearu/core/auth/client`, `@gearu/core/client` (plugin types, optional modules, SEO score).
+- **Server-only** (use in server modules, API routes, `createServerFn` handlers):  
+  `@gearu/core`, `@gearu/core/trpc`, `@gearu/core/auth/server`.
+
+Do not import `@gearu/core/auth/server` or the root `@gearu/core` (which exports `createDb` and schema) from client components or from files that are part of the client route tree. Keep auth server setup and helpers in separate modules (e.g. `auth.ts`, `auth.server.ts`) and import them only from server routes or server functions.
+
+To verify that client artifacts do not contain server-only code, run from the repo root: `pnpm run test:auth-boundary` (builds `@gearu/core` and runs the auth bundle boundary check).
+
 ## Features
 
 - **Collections & Entries** — Define content types with custom fields (text, richtext, number, boolean, image, date, relation)
@@ -265,6 +349,8 @@ SITE_URL=http://localhost:3000
 |--------|---------|-------------|
 | Analytics | `@gearu/plugin-analytics` | Page view tracking, top pages, traffic sources, UTM campaigns |
 | Leads | `@gearu/plugin-leads` | Dynamic form builder, lead capture with UTM tracking, CSV export |
+
+**Using plugins:** Inside this monorepo, plugins are linked via `workspace:*`. For an external app, install the published packages from npm when available (`pnpm add @gearu/plugin-analytics @gearu/plugin-leads`). If a plugin is not yet published, you need to use the monorepo (clone and link) or build and link the plugin package locally until a coordinated publish is available.
 
 ## Tech Stack
 

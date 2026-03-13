@@ -1,4 +1,4 @@
-import { definePlugin } from "@gearu/core"
+import { definePlugin } from "@gearu/core/client"
 import { UserPlus } from "lucide-react"
 import { leadForms, leads } from "./schema"
 import { leadFormsRelations, leadsRelations } from "./relations"
