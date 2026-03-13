@@ -1,0 +1,1 @@
+export { createGearuTRPCReact } from "./react"

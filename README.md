@@ -7,7 +7,7 @@ Open-source headless CMS that installs inside your React project. Built on TanSt
 ### 1. Install
 
 ```bash
-pnpm add @gearu/core @gearu/admin
+pnpm add @gearu/core @gearu/admin drizzle-kit
 ```
 
 ### 2. Install plugins (optional)
@@ -37,7 +37,7 @@ import { defineConfig } from "drizzle-kit"
 
 export default defineConfig({
   schema: [
-    "./node_modules/@gearu/core/dist/schema/index.js",
+    "./node_modules/@gearu/core/dist/index.js",
     // Add plugin schemas as needed
   ],
   out: "./drizzle",
@@ -61,27 +61,37 @@ pnpm drizzle-kit push
 
 ### 5. Set up tRPC
 
-Add the Gearu routers to your tRPC app router:
+Gearu ships the reusable tRPC server/client helpers in the packages, so the host app only needs to wire them to its own `AppRouter`.
 
 ```ts
 // src/trpc/router.ts
-import { createTRPCRouter } from "./init"
-import { collectionsRouter, entriesRouter, mediaRouter, commentsRouter, settingsRouter, aiRouter } from "./routers"
-
-// Import plugin routers
+import { createGearuTRPC, createGearuRouterRecord } from "@gearu/core/trpc"
 import { createAnalyticsRouter } from "@gearu/plugin-analytics"
 import { createLeadsRouter } from "@gearu/plugin-leads"
 
+export interface TRPCContext {
+  headers: Headers
+  session: { user?: { id?: string } } | null
+}
+
+export const { createTRPCRouter, publicProcedure, protectedProcedure, TRPCError } =
+  createGearuTRPC<TRPCContext>()
+
 export const appRouter = createTRPCRouter({
-  collections: collectionsRouter,
-  entries: entriesRouter,
-  media: mediaRouter,
-  comments: commentsRouter,
-  settings: settingsRouter,
-  ai: aiRouter,
-  analytics: createAnalyticsRouter(db, { publicProcedure, protectedProcedure }),
-  leads: createLeadsRouter(db, { publicProcedure, protectedProcedure }),
+  ...createGearuRouterRecord({ db, publicProcedure, protectedProcedure }),
+  analytics: createAnalyticsRouter({ db, publicProcedure, protectedProcedure }),
+  leads: createLeadsRouter({ db, publicProcedure, protectedProcedure, TRPCError }),
 })
+
+export type AppRouter = typeof appRouter
+```
+
+```ts
+// src/trpc/client.ts
+import { createGearuTRPCReact } from "@gearu/admin/trpc"
+import type { AppRouter } from "./router"
+
+export const { TRPCProvider, useTRPC } = createGearuTRPCReact<AppRouter>()
 ```
 
 ### 6. Add admin route
@@ -113,7 +123,7 @@ export const Route = createFileRoute("/admin")({
 import { createFileRoute, Link, useNavigate, useLocation } from "@tanstack/react-router"
 import { GearuAdmin } from "@gearu/admin"
 import "@gearu/admin/styles.css"
-import { useTRPC } from "../integrations/trpc/react"
+import { useTRPC } from "../trpc/client"
 import { authClient } from "../lib/auth-client"
 
 // Import plugins

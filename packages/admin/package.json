@@ -10,6 +10,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./trpc": {
+      "types": "./dist/trpc/index.d.ts",
+      "import": "./dist/trpc/index.js",
+      "default": "./dist/trpc/index.js"
+    },
     "./styles.css": "./styles/admin.css"
   },
   "files": ["dist", "styles"],
@@ -27,7 +32,8 @@
   },
   "peerDependencies": {
     "@gearu/core": "workspace:*",
-    "@trpc/react-query": "*"
+    "@trpc/server": "*",
+    "@trpc/tanstack-react-query": "*"
   },
   "devDependencies": {
     "@gearu/core": "workspace:*",
