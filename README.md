@@ -7,7 +7,7 @@ Open-source headless CMS that installs inside your React project. Built on TanSt
 ### 1. Install
 
 ```bash
-pnpm add @gearu/core @gearu/admin drizzle-kit
+pnpm add @gearu/core @gearu/admin drizzle-kit better-sqlite3
 ```
 
 ### 2. Install plugins (optional)
@@ -65,6 +65,10 @@ Gearu ships the reusable tRPC server/client helpers in the packages, so the host
 
 ```ts
 // src/trpc/router.ts
+import Database from "better-sqlite3"
+import analyticsPlugin from "@gearu/plugin-analytics"
+import leadsPlugin from "@gearu/plugin-leads"
+import { createDb } from "@gearu/core"
 import { createGearuTRPC, createGearuRouterRecord } from "@gearu/core/trpc"
 import { createAnalyticsRouter } from "@gearu/plugin-analytics"
 import { createLeadsRouter } from "@gearu/plugin-leads"
@@ -73,6 +77,11 @@ export interface TRPCContext {
   headers: Headers
   session: { user?: { id?: string } } | null
 }
+
+const connection = new Database("./dev.db")
+const db = createDb(connection, {
+  plugins: [analyticsPlugin, leadsPlugin],
+})
 
 export const { createTRPCRouter, publicProcedure, protectedProcedure, TRPCError } =
   createGearuTRPC<TRPCContext>()
@@ -94,20 +103,58 @@ import type { AppRouter } from "./router"
 export const { TRPCProvider, useTRPC } = createGearuTRPCReact<AppRouter>()
 ```
 
-### 6. Add admin route
+### 6. Set up auth
+
+Gearu's auth tables are already part of `@gearu/core`, so you can create a reusable Better Auth instance from the package helper:
+
+```ts
+// src/lib/auth.ts
+import { createGearuAuth } from "@gearu/core/auth"
+import { db } from "../db"
+
+export const auth = createGearuAuth(db, {
+  secret: process.env.BETTER_AUTH_SECRET,
+})
+```
+
+```ts
+// src/lib/auth-client.ts
+import { createGearuAuthClient } from "@gearu/core/auth"
+
+export const authClient = createGearuAuthClient()
+```
+
+```ts
+// src/lib/auth.server.ts
+import { createGearuAuthServerHelpers } from "@gearu/core/auth"
+import { auth } from "./auth"
+
+export const { getSession, ensureSession } = createGearuAuthServerHelpers(auth)
+```
+
+```tsx
+// src/routes/api/auth/$.tsx
+import { createFileRoute } from "@tanstack/react-router"
+import { auth } from "../../../lib/auth"
+
+export const Route = createFileRoute("/api/auth/$")({
+  server: {
+    handlers: {
+      GET: async ({ request }) => auth.handler(request),
+      POST: async ({ request }) => auth.handler(request),
+    },
+  },
+})
+```
+
+### 7. Add admin route
 
 Create a catch-all admin route that renders the Gearu admin panel:
 
 ```tsx
 // src/routes/admin/route.tsx
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
-import { createServerFn } from "@tanstack/react-start"
-
-const getSession = createServerFn({ method: "GET" }).handler(async () => {
-  const { auth } = await import("./lib/auth")
-  const request = getRequest()
-  return auth.api.getSession({ headers: request.headers })
-})
+import { getSession } from "../../lib/auth.server"
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
@@ -154,7 +201,26 @@ function AdminPage() {
 }
 ```
 
-### 7. Add SEO routes (optional)
+Use `ensureSession` when protecting server functions:
+
+```ts
+// src/lib/posts.server.ts
+import { createServerFn } from "@tanstack/react-start"
+import { ensureSession } from "./auth.server"
+
+export const createPost = createServerFn({ method: "POST" })
+  .inputValidator((data: { title: string }) => data)
+  .handler(async ({ data }) => {
+    const session = await ensureSession()
+
+    return {
+      title: data.title,
+      authorId: session.user.id,
+    }
+  })
+```
+
+### 8. Add SEO routes (optional)
 
 Gearu provides utilities for robots.txt, sitemaps, and OG images:
 
@@ -175,7 +241,7 @@ export const Route = createFileRoute("/api/robots")({
 })
 ```
 
-### 8. Environment variables
+### 9. Environment variables
 
 ```env
 DATABASE_URL=file:./dev.db
