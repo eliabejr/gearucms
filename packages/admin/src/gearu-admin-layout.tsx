@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { LogOut, Menu, X, ExternalLink } from "lucide-react"
+import { LogOut, X, ExternalLink, LayoutDashboard, Database, FileText, LayoutGrid } from "lucide-react"
 import type { ReactNode } from "react"
 import type { GearuAdminNavItem, GearuAdminLinkComponent } from "./types"
 
@@ -46,6 +46,7 @@ export function GearuAdminLayout({
   brandName = "Gearu",
 }: GearuAdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const normalizedBase = basePath.replace(/\/$/, "")
 
   const isActive = (item: GearuAdminNavItem) => {
@@ -54,19 +55,20 @@ export function GearuAdminLayout({
     return pathname === fullPath || pathname.startsWith(fullPath + "/")
   }
 
-  return (
-    <div className="admin-layout flex h-screen bg-[var(--bg-base)]">
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
-          className="fixed inset-0 z-30 cursor-default bg-black/40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+  const closeDrawer = () => setDrawerOpen(false)
+  const closeSidebar = () => setSidebarOpen(false)
 
+  const bottomNavItems: GearuAdminNavItem[] = [
+    { path: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { path: "/collections", label: "Collections", icon: Database },
+    { path: "/entries", label: "Entries", icon: FileText },
+  ]
+
+  return (
+    <div className="admin-layout flex h-screen flex-col bg-[var(--bg-base)] lg:flex-row">
+      {/* Desktop sidebar: in flow so content sits beside it */}
       <aside
-        className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 flex-col transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="sidebar-brand flex items-center justify-between">
           <Link to={normalizedBase} className="flex items-center gap-2.5 no-underline">
@@ -75,7 +77,7 @@ export function GearuAdminLayout({
           </Link>
           <button
             type="button"
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeSidebar}
             className="mobile-close rounded-md p-1.5 lg:hidden"
             aria-label="Close menu"
           >
@@ -91,11 +93,7 @@ export function GearuAdminLayout({
               const Icon = item.icon
               return (
                 <li key={to}>
-                  <Link
-                    to={to}
-                    onClick={() => setSidebarOpen(false)}
-                    className={active ? "nav-active" : ""}
-                  >
+                  <Link to={to} onClick={closeSidebar} className={active ? "nav-active" : ""}>
                     <Icon size={16} strokeWidth={active ? 2.2 : 1.8} />
                     {item.label}
                   </Link>
@@ -120,23 +118,117 @@ export function GearuAdminLayout({
         </div>
       </aside>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-3 border-b border-[var(--line)] bg-[var(--sand)] px-4 py-3 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="rounded-md p-1.5 text-[var(--text-soft)] hover:bg-[var(--surface-soft)]"
-          >
-            <Menu size={18} />
-          </button>
-          <div className="flex items-center gap-2">
-            <img src={logoUrl} alt={brandName} className="h-4 w-4" />
+      {/* Backdrop when sidebar is open on mobile */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="admin-sidebar-backdrop fixed inset-0 z-30 cursor-default bg-black/40 lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+
+      {/* Main content: flex-1 min-w-0 so it doesn't overlap sidebar on desktop */}
+      <div className="admin-main flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="admin-mobile-header flex items-center justify-center border-b border-[var(--line)] bg-[var(--sand)] px-4 py-3 lg:hidden">
+          <Link to={normalizedBase} className="flex items-center gap-2 no-underline">
+            <img src={logoUrl} alt={brandName} className="h-5 w-5 opacity-90" />
             <span className="text-sm font-semibold text-[var(--text)]">{brandName}</span>
-          </div>
+          </Link>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-[var(--bg-base)]">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-[var(--bg-base)] p-4 pb-24 lg:pb-6 lg:p-6">{children}</main>
+
+        {/* Mobile bottom navigation */}
+        <nav className="admin-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden" aria-label="Main navigation">
+          <div className="admin-bottom-nav-inner">
+            {bottomNavItems.map((item) => {
+              const to = item.path === "/" ? normalizedBase : `${normalizedBase}${item.path}`
+              const active = isActive(item)
+              const Icon = item.icon
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`admin-bottom-nav-item ${active ? "admin-bottom-nav-item-active" : ""}`}
+                >
+                  <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className="admin-bottom-nav-item"
+              aria-label="Open menu"
+            >
+              <LayoutGrid size={22} />
+              <span>More</span>
+            </button>
+          </div>
+        </nav>
       </div>
+
+      {/* Full-screen drawer (iOS-style grid of icon cards) */}
+      {drawerOpen && (
+        <>
+          <div
+            className="admin-drawer-backdrop fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
+            aria-hidden
+            onClick={closeDrawer}
+          />
+          <div className="admin-drawer fixed inset-0 z-[70] flex flex-col bg-[var(--bg-base)] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+            <div className="admin-drawer-header flex items-center justify-between border-b border-[var(--line)] px-4 py-4">
+              <span className="text-lg font-semibold text-[var(--text)]">{brandName}</span>
+              <button
+                type="button"
+                onClick={closeDrawer}
+                className="rounded-lg p-2 text-[var(--text-soft)] hover:bg-[var(--surface-soft)]"
+                aria-label="Close menu"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="admin-drawer-user">
+              {sessionSlot}
+            </div>
+            <div className="admin-drawer-grid flex-1 overflow-y-auto p-4">
+              <div className="admin-drawer-cards">
+                {navItems.map((item) => {
+                  const to = item.path === "/" ? normalizedBase : `${normalizedBase}${item.path}`
+                  const Icon = item.icon
+                  return (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={closeDrawer}
+                      className="admin-drawer-card"
+                    >
+                      <span className="admin-drawer-card-icon">
+                        <Icon size={28} strokeWidth={1.8} />
+                      </span>
+                      <span className="admin-drawer-card-label">{item.label}</span>
+                    </Link>
+                  )
+                })}
+                <Link to={viewSiteUrl} onClick={closeDrawer} className="admin-drawer-card">
+                  <span className="admin-drawer-card-icon">
+                    <ExternalLink size={28} strokeWidth={1.8} />
+                  </span>
+                  <span className="admin-drawer-card-label">View Site</span>
+                </Link>
+                <button type="button" onClick={() => { closeDrawer(); onSignOut() }} className="admin-drawer-card admin-drawer-card-signout">
+                  <span className="admin-drawer-card-icon">
+                    <LogOut size={28} strokeWidth={1.8} />
+                  </span>
+                  <span className="admin-drawer-card-label">Sign Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
