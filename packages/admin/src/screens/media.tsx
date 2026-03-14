@@ -3,10 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useCallback, useRef } from "react"
 import { useGearuAdmin } from "../context"
 
-function formatFileSize(bytes: number) {
+export function formatFileSize(bytes: number) {
 	if (bytes < 1024) return `${bytes} B`
 	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+	if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+	return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
 }
 
 export function Media() {
@@ -95,19 +96,17 @@ export function Media() {
 					}}
 				/>
 			</div>
-			<div
+			<button
+				type="button"
 				onDragOver={handleDragOver}
 				onDragLeave={handleDragLeave}
 				onDrop={handleDrop}
 				onClick={() => fileInputRef.current?.click()}
-				onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click() }}
-				role="button"
-				tabIndex={0}
 				className={`island-shell mb-6 flex cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed p-8 transition ${isDragging ? "border-[var(--lagoon)] bg-[var(--lagoon)]/5" : "border-[var(--line)] hover:border-[var(--lagoon)]"}`}
 			>
 				<Upload size={32} className={isDragging ? "text-[var(--lagoon)]" : "text-[var(--sea-ink-soft)]"} />
 				<p className="text-sm text-[var(--sea-ink-soft)]">{isDragging ? "Drop files here..." : "Drag and drop files here, or click to browse"}</p>
-			</div>
+			</button>
 			{isLoading ? (
 				<div className="py-12 text-center text-sm text-[var(--sea-ink-soft)]">Loading...</div>
 			) : !list.length ? (
@@ -142,7 +141,7 @@ export function Media() {
 									type="button"
 									onClick={(ev) => {
 										ev.stopPropagation()
-										if (confirm(`Delete "${item.filename}"?`)) deleteMutation.mutate({ id: item.id } as any)
+										if (confirm(`Delete "${item.filename}"?`)) deleteMutation.mutate({ id: item.id })
 									}}
 									className="rounded-lg bg-white/90 p-1.5 text-[var(--sea-ink-soft)] shadow-sm transition hover:text-red-600"
 									title="Delete"

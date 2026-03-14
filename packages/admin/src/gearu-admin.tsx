@@ -24,14 +24,14 @@ export interface GearuAdminProps {
 	navigate: (path: string) => void
 }
 
-function normalizePath(basePath: string, pathname: string): string {
+export function normalizePath(basePath: string, pathname: string): string {
 	const base = basePath.replace(/\/$/, "")
 	if (pathname === base) return "/"
 	if (!pathname.startsWith(base + "/")) return "/"
 	return "/" + pathname.slice(base.length + 1).replace(/\/$/, "") || "/"
 }
 
-function matchRoute(
+export function matchRoute(
 	internalPath: string,
 	routes: { path: string; Component: ComponentType }[],
 ): { Component: ComponentType; params?: Record<string, string> } | null {
@@ -45,9 +45,15 @@ function matchRoute(
 		const params: Record<string, string> = {}
 		let match = true
 		for (let i = 0; i < routeSegments.length; i++) {
-			if (routeSegments[i]!.startsWith(":")) {
-				params[routeSegments[i]!.slice(1)] = segments[i]!
-			} else if (routeSegments[i] !== segments[i]) {
+			const routeSegment = routeSegments[i]
+			const segment = segments[i]
+			if (!routeSegment || !segment) {
+				match = false
+				break
+			}
+			if (routeSegment.startsWith(":")) {
+				params[routeSegment.slice(1)] = segment
+			} else if (routeSegment !== segment) {
 				match = false
 				break
 			}
@@ -128,7 +134,7 @@ export function GearuAdmin({
 			basePath={basePath}
 			pathname={pathname}
 			navItems={navItems}
-			Link={Link as any}
+			Link={Link}
 			sessionSlot={sessionSlot}
 			onSignOut={onSignOut}
 			viewSiteUrl={viewSiteUrl}

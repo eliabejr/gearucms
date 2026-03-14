@@ -5,6 +5,15 @@ import { useGearuAdmin } from "../context"
 import Select from "../components/select"
 import SeoAnalyzer from "../components/seo-analyzer"
 
+export function slugify(text: string) {
+	return text
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, "")
+		.replace(/[\s_]+/g, "-")
+		.replace(/-+/g, "-")
+}
+
 export function EntriesNew() {
 	const { useTRPC, basePath, navigate, RichTextEditor } = useGearuAdmin()
 	const trpc = useTRPC() as {
@@ -25,11 +34,16 @@ export function EntriesNew() {
 	const [fieldValues, setFieldValues] = useState<Record<number, string | null>>({})
 
 	const { data: collections, isLoading: collectionsLoading } = useQuery(trpc.collections.list.queryOptions())
-	const { data: collection, isLoading: collectionLoading } = useQuery(
-		(trpc as any).collections.getById.queryOptions({ id: selectedCollectionId! }, { enabled: !!selectedCollectionId }),
-	)
+	const collectionQuery = selectedCollectionId
+		? trpc.collections.getById.queryOptions({ id: selectedCollectionId }, { enabled: true })
+		: {
+				queryKey: ["collections", "getById", "idle"],
+				queryFn: async () => undefined,
+				enabled: false,
+			}
+	const { data: collection, isLoading: collectionLoading } = useQuery(collectionQuery)
 	const createMutation = useMutation(
-		(trpc as any).entries.create.mutationOptions({
+		trpc.entries.create.mutationOptions({
 			onSuccess: (entry: { id: number }) => navigate(`${basePath}/entries/${entry.id}`),
 		}),
 	)
@@ -41,13 +55,6 @@ export function EntriesNew() {
 	const setFieldValue = (fieldId: number, value: string | null) => {
 		setFieldValues((prev) => ({ ...prev, [fieldId]: value }))
 	}
-	const slugify = (text: string) =>
-		text
-			.toLowerCase()
-			.trim()
-			.replace(/[^\w\s-]/g, "")
-			.replace(/[\s_]+/g, "-")
-			.replace(/-+/g, "-")
 	const handleTitleChange = (value: string) => {
 		setTitle(value)
 		if (!slug || slug === slugify(title)) setSlug(slugify(value))
