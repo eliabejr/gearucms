@@ -1,3 +1,6 @@
+/** Admin panel styles – loaded when you import from @gearu/admin. Also available as @gearu/admin/styles.css */
+import "../styles/admin.css"
+
 export { GearuAdminLayout } from "./gearu-admin-layout"
 export { GearuAdmin } from "./gearu-admin"
 export { GearuAdminProvider, useGearuAdmin } from "./context"

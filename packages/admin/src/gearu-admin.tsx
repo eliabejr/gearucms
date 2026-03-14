@@ -57,7 +57,11 @@ function matchRoute(
 	return null
 }
 
-/** Renders the Gearu admin panel with routing, layout, and plugin integration. */
+/**
+ * Renders the Gearu admin panel with routing, layout, and plugin integration.
+ * Ensure your app imports the admin styles once (e.g. in the admin route or root layout):
+ *   import "@gearu/admin/styles.css"
+ */
 export function GearuAdmin({
 	pathname,
 	basePath,
@@ -68,7 +72,7 @@ export function GearuAdmin({
 	onSignOut,
 	versionBanner,
 	viewSiteUrl = "/",
-	logoUrl = "/gearu.svg",
+	logoUrl,
 	brandName = "Gearu",
 	RichTextEditor,
 	navigate,

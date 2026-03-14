@@ -220,7 +220,7 @@ function SignupPage() {
 
 ### 7. Add admin route
 
-Create a catch-all admin route that renders the Gearu admin panel:
+Create a catch-all admin route that renders the Gearu admin panel. **You must import the admin CSS** (e.g. in this route or in your root layout) so the panel is styled correctly:
 
 ```tsx
 // src/routes/admin/route.tsx
