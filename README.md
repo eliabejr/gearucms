@@ -2,8 +2,6 @@
 
 Open-source headless CMS that installs inside your React project. Built on TanStack Start, Drizzle ORM, tRPC, and Better Auth.
 
-**Breaking change (auth):** The single `@gearu/core/auth` entrypoint was removed. Use `@gearu/core/auth/client` for the auth client and `@gearu/core/auth/server` for auth and server helpers. See [Set up auth](#6-set-up-auth) and [Import boundaries](#import-boundaries-tanstack-start).
-
 ## Quick Start
 
 ### 1. Install
