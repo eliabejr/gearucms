@@ -1,4 +1,5 @@
 import type { ComponentType } from "react"
+import { ModuleErrorBoundary } from "./components/error-boundary"
 import { Dashboard } from "./screens/dashboard"
 import { Collections } from "./screens/collections"
 import { CollectionId } from "./screens/collection-id"
@@ -17,21 +18,32 @@ export interface AdminRoute {
 	Component: ComponentType
 }
 
+/** Wraps a screen component with a module-level error boundary. */
+function withErrorBoundary(name: string, Screen: ComponentType): ComponentType {
+	return function WrappedScreen() {
+		return (
+			<ModuleErrorBoundary module={name}>
+				<Screen />
+			</ModuleErrorBoundary>
+		)
+	}
+}
+
 /** Core admin routes. Optional module routes fall back to MissingModule when the plugin is not installed. */
 export function getCoreRoutes(): AdminRoute[] {
 	return [
-		{ path: "/", Component: Dashboard },
-		{ path: "/collections", Component: Collections },
-		{ path: "/collections/:id", Component: CollectionId },
-		{ path: "/entries", Component: EntriesIndex },
-		{ path: "/entries/new", Component: EntriesNew },
-		{ path: "/entries/:id", Component: EntryId },
-		{ path: "/entries/:id/preview", Component: EntryPreview },
-		{ path: "/media", Component: Media },
-		{ path: "/comments", Component: Comments },
+		{ path: "/", Component: withErrorBoundary("Dashboard", Dashboard) },
+		{ path: "/collections", Component: withErrorBoundary("Collections", Collections) },
+		{ path: "/collections/:id", Component: withErrorBoundary("Collection", CollectionId) },
+		{ path: "/entries", Component: withErrorBoundary("Entries", EntriesIndex) },
+		{ path: "/entries/new", Component: withErrorBoundary("New Entry", EntriesNew) },
+		{ path: "/entries/:id", Component: withErrorBoundary("Entry", EntryId) },
+		{ path: "/entries/:id/preview", Component: withErrorBoundary("Preview", EntryPreview) },
+		{ path: "/media", Component: withErrorBoundary("Media", Media) },
+		{ path: "/comments", Component: withErrorBoundary("Comments", Comments) },
 		{ path: "/leads", Component: () => <MissingModule moduleName="Leads" slug="leads" /> },
 		{ path: "/analytics", Component: () => <MissingModule moduleName="Analytics" slug="analytics" /> },
-		{ path: "/settings", Component: Settings },
-		{ path: "/ai-writer", Component: AiWriter },
+		{ path: "/settings", Component: withErrorBoundary("Settings", Settings) },
+		{ path: "/ai-writer", Component: withErrorBoundary("AI Writer", AiWriter) },
 	]
 }

@@ -99,16 +99,16 @@ export function GearuAdmin({
 
 	const sessionSlot = (
 		<>
-			<div className="user-avatar flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">
+			<div className="user-avatar">
 				{session?.user?.name?.[0]?.toUpperCase() ?? "U"}
 			</div>
-			<div className="user-name flex-1 truncate text-[13px] font-medium">
+			<div className="user-name">
 				{session?.user?.name ?? session?.user?.email ?? "User"}
 			</div>
 		</>
 	)
 
-	const Child = match?.Component ?? (() => <div className="p-6 text-[var(--sea-ink-soft)]">Not found</div>)
+	const Child = match?.Component ?? (() => <div style={{ padding: "1.5rem", color: "var(--text-soft)" }}>Not found</div>)
 
 	const contextValue = {
 		useTRPC,

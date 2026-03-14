@@ -3,36 +3,25 @@ import { LogOut, X, ExternalLink, LayoutDashboard, Database, FileText, LayoutGri
 import type { ReactNode } from "react"
 import type { GearuAdminNavItem, GearuAdminLinkComponent } from "./types"
 
-/** Inline default logo (Gearu gear) so the admin works without host providing /gearu.svg */
 const DEFAULT_LOGO_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="260" height="260"><path fill="currentColor" d="m20.8 241.3c17-17.3 33.9-34.4 50.8-51.6 4.2-4.2 8.4-8.6 12.6-12.8 1.1-1.1 1.5-2.1 1.2-3.7-3.1-15.3-2.6-30.9-2.5-46.3 0-4.3 0.1-8.5 0-12.8 0-1.6 0.5-2.8 1.6-4 8.9-8.9 17.7-17.8 26.5-26.8 0.8-0.8 1.5-1.2 2.6-1.1 13.1 0 26.2 0.1 39.3 0.1 1.2 0.1 2.2-0.3 3.1-1.2q10.9-11.3 22-22.6c1.4-1.4 1.4-2.4-0.1-3.8-8.8-8-8.8-8.1-20.7-8.1-15.7 0-31.5 0.2-47.2-0.1-9.6-0.2-17.2 3-23.8 9.9-10.3 10.8-21 21.2-31.5 31.8-5.4 5.4-7.5 12.1-7.5 19.5q0 36 0 72c0 1.9-0.5 3.3-1.8 4.7-12.6 12.8-25.2 25.6-37.8 38.5-0.3 0.4-0.6 0.8-1.3 0.8-0.8-0.7-0.4-1.7-0.4-2.6-0.1-46.6 0-93.3-0.1-140 0-1.5 0.5-2.6 1.6-3.7q35.1-35.4 70.2-70.8c1.1-1.2 2.4-1.3 3.8-1.3q64.2 0 128.5 0.1 21 0 42 0c0.9 0 2-0.3 3.2 0.5-44.7 45.7-89.3 91.4-133.9 137 1.1 1.4 2.1 1 3.1 1q24.1 0 48.2 0c3.5 0 3.3 0 3.5 3.5 0.3 3.8-0.8 6.7-3.6 9.4-7.7 7.2-15 14.8-22.3 22.2-1.2 1.2-2.4 1.6-4 1.6-12.4 0-24.8 0-37.2 0-1.8 0-2.9 0.6-4.1 1.8-6.9 7.3-13.9 14.4-20.9 21.6-2 2.1-2 2.5 0.3 4.6q0.1 0 0.2 0.1c8.7 7.6 8.7 7.6 22.5 7.1 8.5-0.4 17 0.3 25.5 0 7.9-0.3 15.8 0.4 23.7-0.3 5.7-0.5 10.7-2.8 14.7-6.8 11.8-11.7 23.7-23.4 35.3-35.4 4.1-4.2 6.1-9.6 6.2-15.6 0.1-7.6 0-15.2 0.1-22.8 0-2.2-0.8-2.8-2.9-2.8-12.5 0.1-25 0-37.5 0-1.1 0-2.2 0.3-3.2-0.3-0.1-1.2 0.9-1.7 1.5-2.3 20-20 40-40.1 59.9-60.2 1.6-1.6 2.5-1.4 4 0.1 5.9 6.1 12 12.1 18 18 1 1 1.4 2 1.4 3.3q0 45.5 0 91c0 2-0.7 3.3-2.1 4.6q-34.2 34.3-68.3 68.8c-1.4 1.4-2.9 1.6-4.7 1.6q-77.2 0-154.3 0-7.5 0-15 0c-0.9 0-1.8 0.2-3-0.5 4.6-5.3 9.8-9.8 14.6-14.9z"/></svg>'
 
 const DEFAULT_LOGO_DATA_URL = `data:image/svg+xml,${encodeURIComponent(DEFAULT_LOGO_SVG)}`
 
 export interface GearuAdminLayoutProps {
-  /** Base path for admin (e.g. "/admin") */
   basePath: string
-  /** Current pathname (e.g. "/admin/collections") - used to highlight active nav */
   pathname: string
-  /** Nav items (core + plugins). path is relative to basePath */
   navItems: GearuAdminNavItem[]
-  /** Main content (matched route component) */
   children: ReactNode
-  /** Host's Link component for navigation */
   Link: GearuAdminLinkComponent
-  /** Session display (user name, avatar) */
   sessionSlot: ReactNode
-  /** Sign out handler */
   onSignOut: () => void
-  /** "View site" URL (e.g. "/") */
   viewSiteUrl?: string
-  /** Logo URL (e.g. "/gearu.svg") or leave unset to use bundled default */
   logoUrl?: string
-  /** Brand name */
   brandName?: string
 }
 
-/** Renders the admin shell layout with sidebar navigation and responsive mobile menu. */
+/** Renders the admin shell layout with sidebar, bottom navigation, and responsive drawer. */
 export function GearuAdminLayout({
   basePath,
   pathname,
@@ -65,27 +54,25 @@ export function GearuAdminLayout({
   ]
 
   return (
-    <div className="admin-layout flex h-screen flex-col bg-[var(--bg-base)] lg:flex-row">
-      {/* Desktop sidebar: in flow so content sits beside it */}
-      <aside
-        className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="sidebar-brand flex items-center justify-between">
-          <Link to={normalizedBase} className="flex items-center gap-2.5 no-underline">
-            <img src={logoUrl} alt={brandName} className="brand-logo h-5 w-5 shrink-0" />
+    <div className="admin-layout">
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
+        <div className="sidebar-brand">
+          <Link to={normalizedBase} className="sidebar-brand-link">
+            <img src={logoUrl} alt={brandName} className="brand-logo" />
             <span>{brandName}</span>
           </Link>
           <button
             type="button"
             onClick={closeSidebar}
-            className="mobile-close rounded-md p-1.5 lg:hidden"
+            className="mobile-close"
             aria-label="Close menu"
           >
             <X size={18} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto">
+        <nav className="sidebar-nav">
           <ul>
             {navItems.map((item) => {
               const to = item.path === "/" ? normalizedBase : `${normalizedBase}${item.path}`
@@ -104,7 +91,7 @@ export function GearuAdminLayout({
         </nav>
 
         <div className="sidebar-footer">
-          <div className="mb-1 flex items-center gap-2.5 rounded-md px-2 py-2">
+          <div className="sidebar-session">
             {sessionSlot}
           </div>
           <Link to={viewSiteUrl}>
@@ -123,24 +110,24 @@ export function GearuAdminLayout({
         <button
           type="button"
           aria-label="Close sidebar"
-          className="admin-sidebar-backdrop fixed inset-0 z-30 cursor-default bg-black/40 lg:hidden"
+          className="admin-sidebar-backdrop"
           onClick={closeSidebar}
         />
       )}
 
-      {/* Main content: flex-1 min-w-0 so it doesn't overlap sidebar on desktop */}
-      <div className="admin-main flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="admin-mobile-header flex items-center justify-center border-b border-[var(--line)] bg-[var(--sand)] px-4 py-3 lg:hidden">
-          <Link to={normalizedBase} className="flex items-center gap-2 no-underline">
-            <img src={logoUrl} alt={brandName} className="h-5 w-5 opacity-90" />
-            <span className="text-sm font-semibold text-[var(--text)]">{brandName}</span>
+      {/* Main content */}
+      <div className="admin-main">
+        <header className="admin-mobile-header">
+          <Link to={normalizedBase} className="admin-mobile-header-link">
+            <img src={logoUrl} alt={brandName} className="brand-logo" />
+            <span>{brandName}</span>
           </Link>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-[var(--bg-base)] p-4 pb-24 lg:pb-6 lg:p-6">{children}</main>
+        <main className="admin-content">{children}</main>
 
         {/* Mobile bottom navigation */}
-        <nav className="admin-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden" aria-label="Main navigation">
+        <nav className="admin-bottom-nav" aria-label="Main navigation">
           <div className="admin-bottom-nav-inner">
             {bottomNavItems.map((item) => {
               const to = item.path === "/" ? normalizedBase : `${normalizedBase}${item.path}`
@@ -170,21 +157,21 @@ export function GearuAdminLayout({
         </nav>
       </div>
 
-      {/* Full-screen drawer (iOS-style grid of icon cards) */}
+      {/* Full-screen drawer */}
       {drawerOpen && (
         <>
           <div
-            className="admin-drawer-backdrop fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
+            className="admin-drawer-backdrop"
             aria-hidden
             onClick={closeDrawer}
           />
-          <div className="admin-drawer fixed inset-0 z-[70] flex flex-col bg-[var(--bg-base)] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-            <div className="admin-drawer-header flex items-center justify-between border-b border-[var(--line)] px-4 py-4">
-              <span className="text-lg font-semibold text-[var(--text)]">{brandName}</span>
+          <div className="admin-drawer" role="dialog" aria-modal="true" aria-label="Menu">
+            <div className="admin-drawer-header">
+              <span className="admin-drawer-title">{brandName}</span>
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="rounded-lg p-2 text-[var(--text-soft)] hover:bg-[var(--surface-soft)]"
+                className="admin-drawer-close"
                 aria-label="Close menu"
               >
                 <X size={24} />
@@ -193,7 +180,7 @@ export function GearuAdminLayout({
             <div className="admin-drawer-user">
               {sessionSlot}
             </div>
-            <div className="admin-drawer-grid flex-1 overflow-y-auto p-4">
+            <div className="admin-drawer-grid">
               <div className="admin-drawer-cards">
                 {navItems.map((item) => {
                   const to = item.path === "/" ? normalizedBase : `${normalizedBase}${item.path}`
