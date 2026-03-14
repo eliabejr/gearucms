@@ -50,11 +50,11 @@ export function Dashboard() {
 			<div className="mb-6 flex items-center justify-between">
 				<h1 className="text-2xl font-bold text-[var(--sea-ink)]">Dashboard</h1>
 				<div className="flex gap-2">
-					<Link to={`${basePath}/collections`} className="flex items-center gap-2 rounded-lg bg-[var(--foam)] px-3 py-2 text-sm font-medium text-[var(--sea-ink)] no-underline transition hover:bg-[var(--sand)]">
+					<Link to={`${basePath}/collections`} className="btn-secondary">
 						<Database size={16} />
 						Collections
 					</Link>
-					<Link to={`${basePath}/entries/new`} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-3 py-2 text-sm font-medium text-white no-underline transition hover:opacity-90">
+					<Link to={`${basePath}/entries/new`} className="btn-primary">
 						<Plus size={16} />
 						New Entry
 					</Link>
@@ -70,7 +70,7 @@ export function Dashboard() {
 				<div className="island-shell p-5">
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="text-lg font-semibold text-[var(--sea-ink)]">Recent Entries</h2>
-						<Link to={`${basePath}/entries`} className="text-sm text-[var(--lagoon)] no-underline hover:underline">
+						<Link to={`${basePath}/entries`} className="link-secondary">
 							View all
 						</Link>
 					</div>
@@ -101,7 +101,7 @@ export function Dashboard() {
 				<div className="island-shell p-5">
 					<div className="mb-4 flex items-center justify-between">
 						<h2 className="text-lg font-semibold text-[var(--sea-ink)]">Pending Comments</h2>
-						<Link to={`${basePath}/comments`} className="text-sm text-[var(--lagoon)] no-underline hover:underline">
+						<Link to={`${basePath}/comments`} className="link-secondary">
 							View all
 						</Link>
 					</div>

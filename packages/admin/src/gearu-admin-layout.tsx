@@ -68,22 +68,23 @@ export function GearuAdminLayout({
       <aside
         className={`sidebar fixed inset-y-0 left-0 z-40 flex w-60 flex-col transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="sidebar-brand flex items-center justify-between px-4 py-3.5">
+        <div className="sidebar-brand flex items-center justify-between">
           <Link to={normalizedBase} className="flex items-center gap-2.5 no-underline">
-            <img src={logoUrl} alt={brandName} className="brand-logo h-5 w-5" />
-            <span className="text-[15px] font-bold tracking-tight">{brandName}</span>
+            <img src={logoUrl} alt={brandName} className="brand-logo h-5 w-5 shrink-0" />
+            <span>{brandName}</span>
           </Link>
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            className="mobile-close rounded-md p-1 lg:hidden"
+            className="mobile-close rounded-md p-1.5 lg:hidden"
+            aria-label="Close menu"
           >
             <X size={18} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2.5 py-3">
-          <ul className="flex flex-col gap-0.5">
+        <nav className="flex-1 overflow-y-auto">
+          <ul>
             {navItems.map((item) => {
               const to = item.path === "/" ? normalizedBase : `${normalizedBase}${item.path}`
               const active = isActive(item)
@@ -93,7 +94,7 @@ export function GearuAdminLayout({
                   <Link
                     to={to}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium no-underline transition ${active ? "nav-active" : ""}`}
+                    className={active ? "nav-active" : ""}
                   >
                     <Icon size={16} strokeWidth={active ? 2.2 : 1.8} />
                     {item.label}
@@ -104,22 +105,15 @@ export function GearuAdminLayout({
           </ul>
         </nav>
 
-        <div className="sidebar-footer px-2.5 py-3">
-          <div className="mb-1 flex items-center gap-2.5 rounded-md px-2.5 py-2">
+        <div className="sidebar-footer">
+          <div className="mb-1 flex items-center gap-2.5 rounded-md px-2 py-2">
             {sessionSlot}
           </div>
-          <Link
-            to={viewSiteUrl}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium no-underline transition"
-          >
+          <Link to={viewSiteUrl}>
             <ExternalLink size={16} />
             View Site
           </Link>
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="sign-out-btn flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition"
-          >
+          <button type="button" onClick={onSignOut} className="sign-out-btn">
             <LogOut size={16} />
             Sign Out
           </button>

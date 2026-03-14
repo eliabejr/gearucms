@@ -101,7 +101,7 @@ function GeneralSettings() {
 		<div className="island-shell p-5">
 			<div className="mb-5 flex items-center justify-between">
 				<h2 className="text-lg font-semibold text-[var(--sea-ink)]">Site Information</h2>
-				<button type="button" onClick={handleSave} disabled={saveMutation.isPending} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50">
+				<button type="button" onClick={handleSave} disabled={saveMutation.isPending} className="btn-primary">
 					{saveMutation.isPending ? "Saving..." : saveMutation.isSuccess ? <><CheckCircle2 size={16} />Saved</> : <><Save size={16} />Save</>}
 				</button>
 			</div>
@@ -185,7 +185,7 @@ function AiProviderSettings() {
 			<div className="island-shell p-5">
 				<div className="mb-5 flex items-center justify-between">
 					<h2 className="text-lg font-semibold text-[var(--sea-ink)]">Default AI Provider</h2>
-					<button type="button" onClick={handleSave} disabled={saveMutation.isPending} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50">
+					<button type="button" onClick={handleSave} disabled={saveMutation.isPending} className="btn-primary">
 						{saveMutation.isPending ? "Saving..." : <><Save size={16} />Save</>}
 					</button>
 				</div>
@@ -275,7 +275,7 @@ function TrackingScriptSettings() {
 	return (
 		<div>
 			<div className="mb-4 flex justify-end">
-				<button type="button" onClick={() => { if (showCreate) resetForm(); else { resetForm(); setShowCreate(true) } }} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-3 py-2 text-sm font-medium text-white transition hover:opacity-90">
+				<button type="button" onClick={() => { if (showCreate) resetForm(); else { resetForm(); setShowCreate(true) } }} className="btn-primary">
 					<Plus size={16} />
 					Add Script
 				</button>
@@ -303,8 +303,8 @@ function TrackingScriptSettings() {
 							Active
 						</label>
 						<div className="flex gap-2">
-							<button type="submit" disabled={isSaving} className="rounded-lg bg-[var(--lagoon)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50">{isSaving ? "Saving..." : editingId ? "Update Script" : "Create Script"}</button>
-							<button type="button" onClick={resetForm} className="rounded-lg bg-[var(--foam)] px-4 py-2 text-sm font-medium text-[var(--sea-ink)] transition hover:bg-[var(--sand)]">Cancel</button>
+							<button type="submit" disabled={isSaving} className="btn-primary">{isSaving ? "Saving..." : editingId ? "Update Script" : "Create Script"}</button>
+							<button type="button" onClick={resetForm} className="btn-secondary">Cancel</button>
 						</div>
 					</form>
 				</div>

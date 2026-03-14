@@ -126,7 +126,7 @@ export function EntryId() {
 					<h1 className="text-2xl font-bold text-[var(--sea-ink)]">Edit Entry</h1>
 					<p className="text-sm text-[var(--sea-ink-soft)]">Slug: /{e.slug}</p>
 				</div>
-				<button type="button" onClick={handleSave} disabled={updateMutation.isPending} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50">
+				<button type="button" onClick={handleSave} disabled={updateMutation.isPending} className="btn-primary">
 					<Save size={16} />
 					{updateMutation.isPending ? "Saving..." : "Save"}
 				</button>
@@ -235,7 +235,7 @@ export function EntryId() {
 											<span className="font-medium text-[var(--sea-ink)]">Version {version.versionNumber}</span>
 											<span className="ml-3 text-xs text-[var(--sea-ink-soft)]">{version.createdAt ? new Date(version.createdAt).toLocaleString() : ""}</span>
 										</div>
-										<button type="button" onClick={() => handleRestore(version.id)} disabled={restoreVersionMutation.isPending} className="flex items-center gap-1 rounded-lg bg-[var(--foam)] px-3 py-1.5 text-sm font-medium text-[var(--sea-ink)] transition hover:bg-[var(--sand)] disabled:opacity-50">
+										<button type="button" onClick={() => handleRestore(version.id)} disabled={restoreVersionMutation.isPending} className="btn-secondary">
 											<RotateCcw size={14} />
 											Restore
 										</button>

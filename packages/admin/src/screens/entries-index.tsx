@@ -42,7 +42,7 @@ export function EntriesIndex() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<h1 className="text-2xl font-bold text-[var(--sea-ink)]">Entries</h1>
-				<Link to={`${basePath}/entries/new`} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-3 py-2 text-sm font-medium text-white no-underline transition hover:opacity-90">
+				<Link to={`${basePath}/entries/new`} className="btn-primary">
 					<Plus size={16} />
 					New Entry
 				</Link>

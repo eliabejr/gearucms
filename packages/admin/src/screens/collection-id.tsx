@@ -96,8 +96,8 @@ export function CollectionId() {
 							className="rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
 						/>
 						<div className="flex gap-2">
-							<button type="submit" className="rounded-lg bg-[var(--lagoon)] px-3 py-1.5 text-sm font-medium text-white">Save</button>
-							<button type="button" onClick={() => setIsEditing(false)} className="rounded-lg bg-[var(--foam)] px-3 py-1.5 text-sm font-medium text-[var(--sea-ink)]">Cancel</button>
+							<button type="submit" className="btn-primary">Save</button>
+							<button type="button" onClick={() => setIsEditing(false)} className="btn-secondary">Cancel</button>
 						</div>
 					</form>
 				) : (
@@ -169,7 +169,7 @@ export function CollectionId() {
 							<input type="checkbox" checked={newFieldRequired} onChange={(e) => setNewFieldRequired(e.target.checked)} className="rounded" />
 							Required
 						</label>
-						<button type="submit" disabled={addFieldMutation.isPending} className="rounded-lg bg-[var(--lagoon)] px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50">Add</button>
+						<button type="submit" disabled={addFieldMutation.isPending} className="btn-primary">Add</button>
 					</form>
 				)}
 				{!col.fields?.length ? (

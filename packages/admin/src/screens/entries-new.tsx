@@ -301,11 +301,11 @@ export function EntriesNew() {
 					/>
 				)}
 				<div className="flex items-center gap-3">
-					<button type="submit" disabled={createMutation.isPending || !selectedCollectionId || !title.trim()} className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50">
+					<button type="submit" disabled={createMutation.isPending || !selectedCollectionId || !title.trim()} className="btn-primary">
 						<Save size={16} />
 						{createMutation.isPending ? "Creating..." : "Create Entry"}
 					</button>
-					<button type="button" onClick={() => navigate(`${basePath}/entries`)} className="rounded-lg bg-[var(--foam)] px-4 py-2 text-sm font-medium text-[var(--sea-ink)] transition hover:bg-[var(--sand)]">
+					<button type="button" onClick={() => navigate(`${basePath}/entries`)} className="btn-secondary">
 						Cancel
 					</button>
 				</div>

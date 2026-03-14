@@ -1,7 +1,5 @@
 /*
- * Gearu Admin
- * #0c0c0c + #ffffff — YC-grade minimalism
- * Scoped to `.admin-layout`
+ * Gearu Admin Styles
  */
 
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
@@ -46,81 +44,120 @@
 }
 
 /* ─────────────────────────────
-   Sidebar — dark chrome
+   Sidebar — dark, minimal chrome
 ──────────────────────────── */
 
 .admin-layout .sidebar {
-	background: #0c0c0c;
-	border-right: none;
+	background: #0a0a0a;
+	border-right: 1px solid rgba(255, 255, 255, 0.06);
+	width: 15rem;
 }
 
 .admin-layout .sidebar-brand {
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	flex-shrink: 0;
 }
 
 .admin-layout .sidebar-brand a {
-	color: #ffffff !important;
+	color: #fff !important;
 	text-decoration: none !important;
+	font-weight: 600;
+	font-size: 15px;
+	letter-spacing: -0.02em;
 }
 
 .admin-layout .sidebar-brand .brand-logo {
 	filter: invert(1);
+	opacity: 0.95;
+}
+
+.admin-layout .sidebar nav {
+	padding: 0.5rem 0.75rem;
+}
+
+.admin-layout .sidebar nav ul {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
 }
 
 .admin-layout .sidebar nav a {
-	color: rgba(255, 255, 255, 0.45);
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.5rem 0.75rem;
+	color: rgba(255, 255, 255, 0.5);
 	text-decoration: none !important;
+	font-size: 13px;
+	font-weight: 500;
 	border-radius: 6px;
-	transition: all 0.12s ease;
+	transition: color 0.15s ease, background 0.15s ease;
 }
 
 .admin-layout .sidebar nav a:hover {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	background: rgba(255, 255, 255, 0.06);
 }
 
 .admin-layout .sidebar nav a.nav-active {
-	color: #ffffff;
+	color: #fff;
 	background: rgba(255, 255, 255, 0.1);
 }
 
 .admin-layout .sidebar-footer {
-	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 0.75rem 0.75rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	flex-shrink: 0;
 }
 
 .admin-layout .sidebar-footer .user-name {
-	color: rgba(255, 255, 255, 0.65);
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 13px;
+	font-weight: 500;
 }
 
 .admin-layout .sidebar-footer .user-avatar {
-	background: rgba(255, 255, 255, 0.1);
-	color: rgba(255, 255, 255, 0.5);
+	background: rgba(255, 255, 255, 0.12);
+	color: rgba(255, 255, 255, 0.8);
 }
 
 .admin-layout .sidebar-footer a,
 .admin-layout .sidebar-footer button {
-	color: rgba(255, 255, 255, 0.4) !important;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	padding: 0.5rem 0.75rem;
+	color: rgba(255, 255, 255, 0.5) !important;
 	text-decoration: none !important;
-	transition: all 0.12s ease;
+	font-size: 13px;
+	font-weight: 500;
+	border-radius: 6px;
+	transition: color 0.15s ease, background 0.15s ease;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	text-align: left;
 }
 
 .admin-layout .sidebar-footer a:hover,
 .admin-layout .sidebar-footer button:hover {
-	color: rgba(255, 255, 255, 0.7) !important;
-	background: rgba(255, 255, 255, 0.06) !important;
+	color: rgba(255, 255, 255, 0.85) !important;
+	background: rgba(255, 255, 255, 0.06);
 }
 
 .admin-layout .sidebar-footer .sign-out-btn:hover {
 	color: #fca5a5 !important;
-	background: rgba(239, 68, 68, 0.1) !important;
+	background: rgba(239, 68, 68, 0.12);
 }
 
 .admin-layout .sidebar .mobile-close {
-	color: rgba(255, 255, 255, 0.3);
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .admin-layout .sidebar .mobile-close:hover {
-	color: rgba(255, 255, 255, 0.6);
+	color: rgba(255, 255, 255, 0.9);
 	background: rgba(255, 255, 255, 0.06);
 }
 
@@ -135,24 +172,41 @@
 }
 
 .admin-layout .island-shell {
-	background: #ffffff;
+	background: var(--surface);
 	border: 1px solid var(--border);
-	border-radius: 8px;
-	padding: 24px;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	border-radius: 10px;
+	padding: 1.5rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .admin-layout .feature-card {
-	background: #ffffff;
+	background: var(--surface);
 	border: 1px solid var(--border);
-	border-radius: 8px;
-	padding: 18px;
-	transition: all 0.12s ease;
+	border-radius: 10px;
+	padding: 1.125rem;
+	transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .admin-layout .feature-card:hover {
 	background: var(--surface-soft);
-	border-color: #d1d5db;
+	border-color: #e0e0e0;
+}
+
+.admin-layout .page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.admin-layout .page-header h1 {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--text);
 }
 
 .admin-layout label {
@@ -194,25 +248,85 @@
 	accent-color: #0c0c0c;
 }
 
+/* ─────────────────────────────
+   Buttons — primary & secondary
+──────────────────────────── */
+
 .admin-layout .btn-primary {
-	background: #0c0c0c;
-	color: #ffffff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	background: var(--black);
+	color: #fff;
 	border: none;
-	border-radius: 6px;
-	padding: 8px 14px;
+	border-radius: 8px;
+	padding: 0.5rem 1rem;
 	font-size: 14px;
 	font-weight: 500;
 	font-family: inherit;
 	cursor: pointer;
-	transition: opacity 0.12s ease;
+	transition: opacity 0.15s ease;
+	text-decoration: none;
 }
 
 .admin-layout .btn-primary:hover {
-	opacity: 0.85;
+	opacity: 0.9;
+}
+
+.admin-layout .btn-primary:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.admin-layout .btn-secondary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	background: var(--surface-soft);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	padding: 0.5rem 1rem;
+	font-size: 14px;
+	font-weight: 500;
+	font-family: inherit;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease;
+	text-decoration: none;
+}
+
+.admin-layout .btn-secondary:hover {
+	background: #eee;
+	border-color: #d1d5db;
+}
+
+.admin-layout .btn-secondary:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.admin-layout .link-secondary {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.375rem 0.75rem;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--text-soft);
+	text-decoration: none;
+	border-radius: 6px;
+	transition: color 0.15s ease, background 0.15s ease;
+}
+
+.admin-layout .link-secondary:hover {
+	color: var(--text);
+	background: var(--surface-soft);
 }
 
 .admin-layout main a {
-	color: #0c0c0c;
+	color: var(--text);
 	text-decoration: none;
 }
 

@@ -42,11 +42,7 @@ export function Collections() {
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<h1 className="text-2xl font-bold text-[var(--sea-ink)]">Collections</h1>
-				<button
-					type="button"
-					onClick={() => setShowCreate(!showCreate)}
-					className="flex items-center gap-2 rounded-lg bg-[var(--lagoon)] px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
-				>
+				<button type="button" onClick={() => setShowCreate(!showCreate)} className="btn-primary">
 					<Plus size={16} />
 					New Collection
 				</button>
@@ -85,10 +81,10 @@ export function Collections() {
 							/>
 						</div>
 						<div className="flex gap-2">
-							<button type="submit" disabled={createMutation.isPending} className="rounded-lg bg-[var(--lagoon)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50">
+							<button type="submit" disabled={createMutation.isPending} className="btn-primary">
 								{createMutation.isPending ? "Creating..." : "Create"}
 							</button>
-							<button type="button" onClick={() => setShowCreate(false)} className="rounded-lg bg-[var(--foam)] px-4 py-2 text-sm font-medium text-[var(--sea-ink)] transition hover:bg-[var(--sand)]">
+							<button type="button" onClick={() => setShowCreate(false)} className="btn-secondary">
 								Cancel
 							</button>
 						</div>
