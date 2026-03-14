@@ -7,6 +7,7 @@ Format follows [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Features
 
+- **admin:** adding storybook tests (`6bb6d2f`)
 - **admin:** enhancing stylings at mobile (`1e23d02`)
 - **admin:** bottom navigation at mobile (`84c7be9`)
 - **admin:** enhancing styles of admin panel (`a078242`)
@@ -35,6 +36,7 @@ Format follows [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Chores
 
+- changelogs and contributing guidelines (`dfd0fd7`)
 - **admin:** changing assets export approach (`4a8553b`)
 - bump packages (`65ef933`)
 - moving repository to public (`6f05318`)
