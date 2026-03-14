@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "gearu-demo",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@gearu/demo", "dev"],
+      "port": 3000
+    },
+    {
       "name": "gearu-web",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@gearu/web", "dev"],

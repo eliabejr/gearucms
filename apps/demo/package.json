@@ -1,0 +1,35 @@
+{
+  "name": "@gearu/demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@gearu/admin": "workspace:*",
+    "@gearu/core": "workspace:*",
+    "@gearu/plugin-analytics": "workspace:*",
+    "@gearu/plugin-leads": "workspace:*",
+    "@tanstack/react-query": "latest",
+    "@trpc/client": "^11.11.0",
+    "@trpc/server": "^11.11.0",
+    "@trpc/tanstack-react-query": "^11.11.0",
+    "better-sqlite3": "^12.6.2",
+    "drizzle-orm": "^0.45.1",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "superjson": "^2.2.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.4",
+    "typescript": "^5.7.2",
+    "vite": "^7.3.1"
+  }
+}

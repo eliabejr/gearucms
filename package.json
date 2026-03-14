@@ -27,7 +27,9 @@
     "build:cf": "DEPLOY_TARGET=cloudflare vite build",
     "d1:migrate:local": "npx wrangler d1 migrations apply eli-cms-db --local",
     "d1:migrate:remote": "npx wrangler d1 migrations apply eli-cms-db --remote",
-    "gearu": "gearu"
+    "gearu": "gearu",
+    "changelog": "tsx scripts/changelog.ts",
+    "release": "tsx scripts/changelog.ts --tag"
   },
   "dependencies": {
     "@gearu/admin": "workspace:*",
