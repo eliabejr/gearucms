@@ -1,5 +1,6 @@
 export { createGearuTRPC } from "./init"
 export type { GearuTRPCContext } from "./init"
+export { getUserFacingErrorMessage } from "./error-handler"
 export {
 	createAiRouter,
 	createCollectionsRouter,

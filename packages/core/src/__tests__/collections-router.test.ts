@@ -13,10 +13,11 @@ describe("collections router", () => {
 
 		try {
 			const created = await caller.collections.create({
-				name: "News Articles",
+				name: "  News Articles  ",
 				description: "Company updates",
 			})
 
+			expect(created.name).toBe("News Articles")
 			expect(created.slug).toBe("news-articles")
 
 			const secondId = seedCollection(testDb.connection, { name: "Docs", slug: "docs" })

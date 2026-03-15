@@ -28,6 +28,7 @@ function slugify(text: string): string {
 }
 
 const fieldTypeEnum = z.enum(["text", "richtext", "number", "boolean", "image", "relation", "date"])
+const requiredText = (label: string) => z.string().trim().min(1, `${label} is required`)
 
 export interface CreateGearuRouterContext {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,21 +61,41 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 		}),
 
 		create: protectedProcedure
-			.input(z.object({ name: z.string().min(1), slug: z.string().optional(), description: z.string().optional() }))
+			.input(z.object({
+				name: requiredText("Collection name"),
+				slug: z.string().trim().optional(),
+				description: z.string().trim().optional(),
+			}))
 			.mutation(async (opts: { input: { name: string; slug?: string; description?: string } }) => {
-				const slug = opts.input.slug || slugify(opts.input.name)
+				const name = opts.input.name.trim()
+				const slug = opts.input.slug?.trim() || slugify(name)
+				const description = opts.input.description?.trim() || undefined
 				const [collection] = await db
 					.insert(collections)
-					.values({ name: opts.input.name, slug, description: opts.input.description })
+					.values({ name, slug, description })
 					.returning()
 				return collection
 			}),
 
 		update: protectedProcedure
-			.input(z.object({ id: z.number(), name: z.string().min(1).optional(), slug: z.string().optional(), description: z.string().optional() }))
+			.input(z.object({
+				id: z.number(),
+				name: requiredText("Collection name").optional(),
+				slug: z.string().trim().optional(),
+				description: z.string().trim().optional(),
+			}))
 			.mutation(async (opts: { input: { id: number; name?: string; slug?: string; description?: string } }) => {
 				const { id, ...data } = opts.input
-				const [collection] = await db.update(collections).set(data).where(eq(collections.id, id)).returning()
+				const [collection] = await db
+					.update(collections)
+					.set({
+						...data,
+						name: data.name?.trim(),
+						slug: data.slug?.trim(),
+						description: data.description?.trim() || undefined,
+					})
+					.where(eq(collections.id, id))
+					.returning()
 				return collection
 			}),
 
@@ -86,13 +107,14 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 		addField: protectedProcedure
 			.input(z.object({
 				collectionId: z.number(),
-				name: z.string().min(1),
-				slug: z.string().optional(),
+				name: requiredText("Field name"),
+				slug: z.string().trim().optional(),
 				type: fieldTypeEnum,
 				required: z.boolean().default(false),
 			}))
 			.mutation(async (opts: { input: { collectionId: number; name: string; slug?: string; type: z.infer<typeof fieldTypeEnum>; required: boolean } }) => {
-				const slug = opts.input.slug || slugify(opts.input.name)
+				const name = opts.input.name.trim()
+				const slug = opts.input.slug?.trim() || slugify(name)
 				const existing = await db.query.collectionFields.findMany({
 					where: eq(collectionFields.collectionId, opts.input.collectionId),
 				})
@@ -100,7 +122,7 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 					.insert(collectionFields)
 					.values({
 						collectionId: opts.input.collectionId,
-						name: opts.input.name,
+						name,
 						slug,
 						type: opts.input.type,
 						required: opts.input.required,
@@ -113,14 +135,22 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 		updateField: protectedProcedure
 			.input(z.object({
 				id: z.number(),
-				name: z.string().optional(),
-				slug: z.string().optional(),
+				name: requiredText("Field name").optional(),
+				slug: z.string().trim().optional(),
 				type: fieldTypeEnum.optional(),
 				required: z.boolean().optional(),
 			}))
 			.mutation(async (opts: { input: { id: number; name?: string; slug?: string; type?: z.infer<typeof fieldTypeEnum>; required?: boolean } }) => {
 				const { id, ...data } = opts.input
-				const [field] = await db.update(collectionFields).set(data).where(eq(collectionFields.id, id)).returning()
+				const [field] = await db
+					.update(collectionFields)
+					.set({
+						...data,
+						name: data.name?.trim(),
+						slug: data.slug?.trim(),
+					})
+					.where(eq(collectionFields.id, id))
+					.returning()
 				return field
 			}),
 

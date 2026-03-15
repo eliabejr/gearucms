@@ -1,6 +1,8 @@
 import { TRPCError, initTRPC } from "@trpc/server"
 import type { TRPCBuiltRouter, TRPCRouterRecord } from "@trpc/server"
 import superjson from "superjson"
+import { ZodError } from "zod"
+import { getUserFacingErrorMessage } from "./error-handler"
 
 export interface GearuTRPCContext<TSession = { user?: unknown }> {
 	headers: Headers
@@ -22,6 +24,20 @@ export interface GearuTRPCFactoryResult {
 export function createGearuTRPC<TContext extends GearuTRPCContext = GearuTRPCContext>(): GearuTRPCFactoryResult {
 	const t = initTRPC.context<TContext>().create({
 		transformer: superjson,
+		errorFormatter({ shape, error }) {
+			const userMessage = getUserFacingErrorMessage(error)
+			const zodError = error.cause instanceof ZodError ? error.cause.flatten() : null
+
+			return {
+				...shape,
+				message: userMessage,
+				data: {
+					...shape.data,
+					userMessage,
+					zodError,
+				},
+			}
+		},
 	})
 
 	const publicProcedure = t.procedure
