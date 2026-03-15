@@ -1,0 +1,40 @@
+Project: Gearu
+Summary: Open-source headless CMS for React apps with type-safe collections, entries, admin UI, SEO, AI content workflows, analytics, and lead capture.
+
+Canonical sources:
+- Repository: https://github.com/eliabejr/gearucms
+- Documentation: https://github.com/eliabejr/gearucms#readme
+- Core package: https://www.npmjs.com/package/@gearu/core
+- Admin package: https://www.npmjs.com/package/@gearu/admin
+- CLI package: https://www.npmjs.com/package/@gearu/cli
+
+Key packages:
+- `@gearu/core`: core schema, runtime helpers, SEO utilities, and tRPC router primitives.
+- `@gearu/admin`: admin UI package for managing content.
+- `@gearu/cli`: CLI package that installs the `gearu` command for project setup, migrations, upgrades, and local CRUD commands.
+- `@gearu/plugin-analytics`: first-party analytics plugin.
+- `@gearu/plugin-leads`: first-party lead capture plugin.
+
+Getting started:
+1. Install core packages: `pnpm add @gearu/core @gearu/admin drizzle-kit better-sqlite3`
+2. Optionally install plugins: `pnpm add @gearu/plugin-analytics @gearu/plugin-leads`
+3. Create `gearu.config.ts`
+4. Run database migrations
+5. Wire Gearu into your app's tRPC and auth setup
+6. Mount the admin UI route
+
+CLI notes:
+- `gearu collections list|get|create|update|delete`
+- `gearu entries list|get|create|update|delete`
+- Add `--json` to CLI CRUD commands for stable machine-readable output.
+- Entry mutations accept `--fields` as JSON: `[{"fieldId":1,"value":"..."},{"fieldId":2,"value":null}]`
+
+Content model:
+- Collections define reusable content types.
+- Collection fields define the schema for a collection.
+- Entries belong to collections and store field values.
+- Entry versions preserve snapshots for restoration.
+
+Useful links for LLMs:
+- README quick start: https://github.com/eliabejr/gearucms#quick-start
+- Issues: https://github.com/eliabejr/gearucms/issues
