@@ -2,6 +2,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useGearuAdmin } from "../context"
+import { getErrorMessage } from "../lib/error-handler"
 
 export function Collections() {
 	const { useTRPC, Link, basePath } = useGearuAdmin()
@@ -37,12 +38,20 @@ export function Collections() {
 	)
 
 	const list = (collections as { id: number; name: string; slug: string; description?: string; fields?: unknown[]; entries?: unknown[] }[]) ?? []
+	const createErrorMessage = createMutation.isError ? getErrorMessage(createMutation.error) : null
 
 	return (
 		<div>
 			<div className="mb-6 flex items-center justify-between">
 				<h1 className="text-2xl font-bold text-[var(--sea-ink)]">Collections</h1>
-				<button type="button" onClick={() => setShowCreate(!showCreate)} className="btn-primary">
+				<button
+					type="button"
+					onClick={() => {
+						if (showCreate && createMutation.isError) createMutation.reset()
+						setShowCreate(!showCreate)
+					}}
+					className="btn-primary"
+				>
 					<Plus size={16} />
 					New Collection
 				</button>
@@ -53,7 +62,10 @@ export function Collections() {
 					<form
 						onSubmit={(e) => {
 							e.preventDefault()
-							createMutation.mutate({ name: newName, description: newDescription || undefined })
+							const name = newName.trim()
+							const description = newDescription.trim() || undefined
+							if (!name) return
+							createMutation.mutate({ name, description })
 						}}
 						className="flex flex-col gap-3"
 					>
@@ -63,8 +75,12 @@ export function Collections() {
 								id="col-name"
 								type="text"
 								value={newName}
-								onChange={(e) => setNewName(e.target.value)}
+								onChange={(e) => {
+									if (createMutation.isError) createMutation.reset()
+									setNewName(e.target.value)
+								}}
 								required
+								name="name"
 								placeholder="e.g. Blog Posts"
 								className="w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
 							/>
@@ -75,19 +91,32 @@ export function Collections() {
 								id="col-desc"
 								type="text"
 								value={newDescription}
-								onChange={(e) => setNewDescription(e.target.value)}
+								onChange={(e) => {
+									if (createMutation.isError) createMutation.reset()
+									setNewDescription(e.target.value)
+								}}
 								placeholder="Optional description"
 								className="w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
 							/>
 						</div>
 						<div className="flex gap-2">
-							<button type="submit" disabled={createMutation.isPending} className="btn-primary">
+							<button type="submit" disabled={createMutation.isPending || !newName.trim()} className="btn-primary">
 								{createMutation.isPending ? "Creating..." : "Create"}
 							</button>
-							<button type="button" onClick={() => setShowCreate(false)} className="btn-secondary">
+							<button
+								type="button"
+								onClick={() => {
+									if (createMutation.isError) createMutation.reset()
+									setShowCreate(false)
+								}}
+								className="btn-secondary"
+							>
 								Cancel
 							</button>
 						</div>
+						{createErrorMessage && (
+							<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{createErrorMessage}</div>
+						)}
 					</form>
 				</div>
 			)}
