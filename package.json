@@ -36,7 +36,7 @@
     "@gearu/core": "workspace:*",
     "@gearu/plugin-analytics": "workspace:*",
     "@gearu/plugin-leads": "workspace:*",
-    "gearu": "workspace:*",
+    "@gearu/cli": "workspace:*",
     "@faker-js/faker": "^10.3.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@sentry/tanstackstart-react": "^10.42.0",

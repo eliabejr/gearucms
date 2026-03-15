@@ -48,7 +48,7 @@ Requirements: Node.js >= 18, pnpm >= 9.
 |---------|------|-------------|
 | `@gearu/core` | `packages/core` | Schema, plugin system, SEO, database utilities |
 | `@gearu/admin` | `packages/admin` | Admin panel UI (framework-agnostic React) |
-| `gearu` | `packages/cli` | CLI tool (`create-gearu`, migrations) |
+| `@gearu/cli` | `packages/cli` | CLI tool (`gearu`, migrations, local CRUD) |
 | `@gearu/plugin-analytics` | `packages/plugins/analytics` | Page view tracking and dashboard |
 | `@gearu/plugin-leads` | `packages/plugins/leads` | Lead capture forms and management |
 | `@gearu/web` | `apps/web` | Marketing website |
