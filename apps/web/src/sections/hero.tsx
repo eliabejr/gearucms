@@ -38,7 +38,7 @@ export function Hero() {
 				<div className="hero-code">
 					<code>
 						<span className="comment">
-							{"# Install Gearu in your React project"}
+							{"# Install core + admin panel"}
 						</span>
 						<br />
 						<span className="keyword">{"pnpm"}</span>
@@ -46,13 +46,20 @@ export function Hero() {
 						<span className="string">{"@gearu/core @gearu/admin"}</span>
 						<br />
 						<br />
-						<span className="comment">{"# Add plugins you need"}</span>
+						<span className="comment">{"# Add plugins"}</span>
 						<br />
 						<span className="keyword">{"pnpm"}</span>
 						{" add "}
 						<span className="string">
 							{"@gearu/plugin-analytics @gearu/plugin-leads"}
 						</span>
+						<br />
+						<br />
+						<span className="comment">{"# Scaffold config and admin route"}</span>
+						<br />
+						<span className="keyword">{"pnpm"}</span>
+						{" gearu "}
+						<span className="string">{"init"}</span>
 					</code>
 				</div>
 			</div>

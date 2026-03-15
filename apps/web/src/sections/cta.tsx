@@ -10,6 +10,15 @@ export function CTA() {
 						Install the packages, define your collections, and ship a
 						production-ready CMS in minutes.
 					</p>
+
+					<div className="cta-code">
+						<code>
+							<span className="keyword">{"pnpm"}</span>
+							{" add "}
+							<span className="string">{"@gearu/core @gearu/admin"}</span>
+						</code>
+					</div>
+
 					<div className="cta-actions">
 						<a
 							href="https://github.com/eliabejr/gearucms#readme"

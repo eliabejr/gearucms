@@ -16,19 +16,19 @@ export function DeveloperExperience() {
             <ul className="dx-list">
               <li>
                 <Check size={18} />
-                Drizzle ORM — type-safe SQL with zero overhead
+                <code>createDb</code> — merges core + plugin schemas into one Drizzle instance
               </li>
               <li>
                 <Check size={18} />
-                tRPC — end-to-end type safety, no REST boilerplate
+                <code>createGearuTRPC</code> — generates typed procedures with auth middleware
               </li>
               <li>
                 <Check size={18} />
-                Plugin schemas merge automatically into your database
+                <code>createGearuRouterRecord</code> — wires all core routes in one call
               </li>
               <li>
                 <Check size={18} />
-                Works with TanStack Start, Next.js, Remix, or any React setup
+                Plugin routers merge with a single spread
               </li>
               <li>
                 <Check size={18} />
@@ -36,60 +36,60 @@ export function DeveloperExperience() {
               </li>
               <li>
                 <Check size={18} />
-                Cloudflare D1 compatible for edge deployments
+                Works with TanStack Start, Next.js, Remix, or any React setup
               </li>
             </ul>
           </div>
 
           <div className="dx-code">
             <pre>
-              <span className="comment">{"// gearu.config.ts"}</span>
+              <span className="comment">{"// src/trpc/router.ts"}</span>
               {"\n"}
               <span className="keyword">{"import"}</span>
               {" { "}
-              <span className="type">{"defineConfig"}</span>
-              {" } "}
+              <span className="type">{"createGearuTRPC"}</span>
+              {", "}
+              <span className="type">{"createGearuRouterRecord"}</span>
+              {" }\n  "}
               <span className="keyword">{"from"}</span>
               {" "}
-              <span className="string">{'"@gearu/core"'}</span>
+              <span className="string">{'"@gearu/core/trpc"'}</span>
               {"\n"}
               <span className="keyword">{"import"}</span>
               {" { "}
-              <span className="type">{"analyticsPlugin"}</span>
-              {" } "}
+              <span className="type">{"createAnalyticsRouter"}</span>
+              {" }\n  "}
               <span className="keyword">{"from"}</span>
               {" "}
               <span className="string">{'"@gearu/plugin-analytics"'}</span>
               {"\n"}
               <span className="keyword">{"import"}</span>
               {" { "}
-              <span className="type">{"leadsPlugin"}</span>
-              {" } "}
+              <span className="type">{"createLeadsRouter"}</span>
+              {" }\n  "}
               <span className="keyword">{"from"}</span>
               {" "}
               <span className="string">{'"@gearu/plugin-leads"'}</span>
               {"\n\n"}
-              <span className="keyword">{"export default"}</span>
-              {" "}
-              <span className="type">{"defineConfig"}</span>
+              <span className="keyword">{"const"}</span>
+              {" { createTRPCRouter, publicProcedure,\n  protectedProcedure, TRPCError } =\n  "}
+              <span className="type">{"createGearuTRPC"}</span>
+              {"()\n\n"}
+              <span className="keyword">{"const"}</span>
+              {" ctx = { db, publicProcedure,\n  protectedProcedure, TRPCError }\n\n"}
+              <span className="keyword">{"export const"}</span>
+              {" appRouter = "}
+              <span className="type">{"createTRPCRouter"}</span>
               {"({\n"}
-              {"  siteName: "}
-              <span className="string">{'"My Website"'}</span>
-              {",\n"}
-              {"  siteUrl: "}
-              <span className="string">{'"https://example.com"'}</span>
-              {",\n\n"}
-              {"  "}
-              <span className="comment">{"// Add plugins you need"}</span>
-              {"\n"}
-              {"  plugins: [\n"}
-              {"    "}
-              <span className="type">{"analyticsPlugin"}</span>
-              {"(),\n"}
-              {"    "}
-              <span className="type">{"leadsPlugin"}</span>
-              {"(),\n"}
-              {"  ],\n"}
+              {"  ..."}
+              <span className="type">{"createGearuRouterRecord"}</span>
+              {"(ctx),\n"}
+              {"  ..."}
+              <span className="type">{"createAnalyticsRouter"}</span>
+              {"(ctx),\n"}
+              {"  ..."}
+              <span className="type">{"createLeadsRouter"}</span>
+              {"(ctx),\n"}
               {"})"}
             </pre>
           </div>
