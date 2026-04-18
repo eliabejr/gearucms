@@ -1,9 +1,11 @@
 import { ArrowLeft, Save, History, RotateCcw, ChevronDown, Search } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, lazy } from "react"
 import { useGearuAdmin } from "../context"
 import Select from "../components/select"
 import SeoAnalyzer from "../components/seo-analyzer"
+
+const BuiltInRichTextEditor = lazy(() => import("../components/rich-text-editor"))
 
 export function EntryId() {
 	const { useTRPC, basePath, navigate, params, RichTextEditor } = useGearuAdmin()
@@ -70,15 +72,14 @@ export function EntryId() {
 		const value = fieldValues[field.id] ?? ""
 		const inputClass = "w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
 		switch (field.type) {
-			case "richtext":
-				if (RichTextEditor) {
-					return (
-						<Suspense fallback={<div className={`${inputClass} min-h-[150px] animate-pulse`} />}>
-							<RichTextEditor content={value} onChange={(html) => setFieldValue(field.id, html)} placeholder={`Enter ${field.name.toLowerCase()}`} />
-						</Suspense>
-					)
-				}
-				return <textarea value={value} onChange={(e) => setFieldValue(field.id, e.target.value)} placeholder={`Enter ${field.name.toLowerCase()}`} rows={6} className={`${inputClass} min-h-[150px]`} />
+			case "richtext": {
+				const Editor = RichTextEditor ?? BuiltInRichTextEditor
+				return (
+					<Suspense fallback={<div className={`${inputClass} min-h-[200px] animate-pulse`} />}>
+						<Editor content={value} onChange={(html) => setFieldValue(field.id, html)} placeholder={`Enter ${field.name.toLowerCase()}`} />
+					</Suspense>
+				)
+			}
 			case "number":
 				return <input type="number" value={value} onChange={(e) => setFieldValue(field.id, e.target.value)} className={inputClass} />
 			case "boolean":
