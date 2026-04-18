@@ -32,12 +32,12 @@
     "release": "tsx scripts/changelog.ts --tag"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@gearu/admin": "workspace:*",
+    "@gearu/cli": "workspace:*",
     "@gearu/core": "workspace:*",
     "@gearu/plugin-analytics": "workspace:*",
     "@gearu/plugin-leads": "workspace:*",
-    "@gearu/cli": "workspace:*",
-    "@faker-js/faker": "^10.3.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@sentry/tanstackstart-react": "^10.42.0",
     "@tailwindcss/vite": "^4.1.18",
@@ -88,6 +88,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
+    "@cloudflare/workers-types": "^4.20250303.0",
     "@inlang/paraglide-js": "^2.13.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-event-client": "latest",
@@ -107,8 +108,7 @@
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5",
-    "wrangler": "^4.14.0",
-    "@cloudflare/workers-types": "^4.20250303.0"
+    "wrangler": "^4.14.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -118,7 +118,9 @@
       "esbuild",
       "lightningcss",
       "prisma",
-      "protobufjs"
+      "protobufjs",
+      "sharp",
+      "workerd"
     ]
   }
 }
