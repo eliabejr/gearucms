@@ -4,10 +4,12 @@ import {
 	session,
 	account,
 	collections,
+	collectionRedirects,
 	collectionFields,
 	entries,
 	entryFields,
 	entryVersions,
+	entryRedirects,
 	comments,
 	aiJobs,
 	aiJobItems,
@@ -17,6 +19,7 @@ import {
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
+	comments: many(comments),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -36,7 +39,15 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const collectionsRelations = relations(collections, ({ many }) => ({
 	fields: many(collectionFields),
 	entries: many(entries),
+	redirects: many(collectionRedirects),
 	aiJobs: many(aiJobs),
+}))
+
+export const collectionRedirectsRelations = relations(collectionRedirects, ({ one }) => ({
+	collection: one(collections, {
+		fields: [collectionRedirects.collectionId],
+		references: [collections.id],
+	}),
 }))
 
 export const collectionFieldsRelations = relations(
@@ -57,6 +68,7 @@ export const entriesRelations = relations(entries, ({ one, many }) => ({
 	}),
 	fields: many(entryFields),
 	versions: many(entryVersions),
+	redirects: many(entryRedirects),
 	comments: many(comments),
 }))
 
@@ -78,10 +90,21 @@ export const entryVersionsRelations = relations(entryVersions, ({ one }) => ({
 	}),
 }))
 
+export const entryRedirectsRelations = relations(entryRedirects, ({ one }) => ({
+	entry: one(entries, {
+		fields: [entryRedirects.entryId],
+		references: [entries.id],
+	}),
+}))
+
 export const commentsRelations = relations(comments, ({ one }) => ({
 	entry: one(entries, {
 		fields: [comments.entryId],
 		references: [entries.id],
+	}),
+	user: one(user, {
+		fields: [comments.userId],
+		references: [user.id],
 	}),
 }))
 

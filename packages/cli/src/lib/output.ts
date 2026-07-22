@@ -9,6 +9,7 @@ export function printSuccess<T>(
   options: JsonFlagOption,
   toText: (result: T) => string,
 ) {
+  process.exitCode = undefined
   if (options.json) {
     console.log(JSON.stringify({ success: true, data: result }, null, 2))
     return

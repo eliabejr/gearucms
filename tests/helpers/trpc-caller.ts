@@ -6,6 +6,7 @@ export interface TestSession {
 		id?: string
 		name?: string
 		email?: string
+		emailVerified?: boolean
 	}
 }
 

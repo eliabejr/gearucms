@@ -13,6 +13,7 @@ export function EntryId() {
 	const trpc = useTRPC() as {
 		entries: {
 			getById: { queryOptions: (opts: { id: number }) => { queryKey: unknown[] } }
+			list: { queryOptions: (opts: { limit: number }) => { queryKey: unknown[] } }
 			getVersions: { queryOptions: (opts: { entryId: number }) => { queryKey: unknown[] } }
 			update: { mutationOptions: (opts: { onSuccess: () => void }) => unknown }
 			updateStatus: { mutationOptions: (opts: { onSuccess: () => void }) => unknown }
@@ -21,8 +22,10 @@ export function EntryId() {
 	}
 	const queryClient = useQueryClient()
 	const { data: entry, isLoading } = useQuery(trpc.entries.getById.queryOptions({ id }))
+	const { data: relationEntries } = useQuery(trpc.entries.list.queryOptions({ limit: 500 }))
 	const { data: versions } = useQuery(trpc.entries.getVersions.queryOptions({ entryId: id }))
 	const [title, setTitle] = useState("")
+	const [slug, setSlug] = useState("")
 	const [fieldValues, setFieldValues] = useState<Record<number, string | null>>({})
 	const [status, setStatus] = useState<"draft" | "published" | "archived">("draft")
 	const [metaTitle, setMetaTitle] = useState("")
@@ -32,9 +35,10 @@ export function EntryId() {
 	const [showVersions, setShowVersions] = useState(false)
 
 	useEffect(() => {
-		const e = entry as { title: string; status: string; metaTitle?: string; metaDescription?: string; ogImage?: string; fields?: { fieldId: number; value: string | null }[] } | undefined
+		const e = entry as { title: string; slug: string; status: string; metaTitle?: string; metaDescription?: string; ogImage?: string; fields?: { fieldId: number; value: string | null }[] } | undefined
 		if (e) {
 			setTitle(e.title)
+			setSlug(e.slug)
 			setStatus(e.status as "draft" | "published" | "archived")
 			setMetaTitle(e.metaTitle ?? "")
 			setMetaDescription(e.metaDescription ?? "")
@@ -57,7 +61,7 @@ export function EntryId() {
 		const e = entry as { collection?: { fields?: { id: number }[] } }
 		const collectionFields = e?.collection?.fields ?? []
 		const fields = collectionFields.map((cf: { id: number }) => ({ fieldId: cf.id, value: fieldValues[cf.id] ?? null }))
-		updateMutation.mutate({ id, title, metaTitle: metaTitle || null, metaDescription: metaDescription || null, ogImage: ogImage || null, fields } as any)
+		updateMutation.mutate({ id, title, slug, metaTitle: metaTitle || null, metaDescription: metaDescription || null, ogImage: ogImage || null, fields } as any)
 	}
 	const handleStatusChange = (newStatus: "draft" | "published" | "archived") => {
 		setStatus(newStatus)
@@ -68,7 +72,7 @@ export function EntryId() {
 	}
 	const setFieldValue = (fieldId: number, value: string | null) => setFieldValues((prev) => ({ ...prev, [fieldId]: value }))
 
-	const renderField = (field: { id: number; name: string; type: string; required: boolean | null }) => {
+	const renderField = (field: { id: number; name: string; type: string; required: boolean | null; config?: string | null }) => {
 		const value = fieldValues[field.id] ?? ""
 		const inputClass = "w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
 		switch (field.type) {
@@ -89,15 +93,48 @@ export function EntryId() {
 						{field.name}
 					</label>
 				)
+			case "relation": {
+				const config = field.config ? JSON.parse(field.config) as { relation?: { targetCollectionId?: number; multiple?: boolean } } : {}
+				const targetId = config.relation?.targetCollectionId
+				const options = Array.isArray(relationEntries)
+					? (relationEntries as Array<{ id: number; title: string; collection?: { id?: number } }>).filter(
+							(candidate) => candidate.id !== id && (!targetId || candidate.collection?.id === targetId),
+						)
+					: []
+				const selected = config.relation?.multiple
+					? (() => {
+							try { return JSON.parse(value || "[]") as number[] } catch { return [] }
+						})()
+					: []
+				return config.relation?.multiple ? (
+					<select
+						multiple
+						value={selected.map(String)}
+						onChange={(event) => setFieldValue(field.id, JSON.stringify(
+							Array.from(event.currentTarget.selectedOptions, (option) => Number(option.value)),
+						))}
+						className={`${inputClass} min-h-28`}
+					>
+						{options.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.title}</option>)}
+					</select>
+				) : (
+					<Select
+						value={value}
+						onChange={(next) => setFieldValue(field.id, next || null)}
+						options={options.map((candidate) => ({ value: String(candidate.id), label: candidate.title }))}
+						placeholder="Select related entry"
+						isClearable
+					/>
+				)
+			}
 			case "image":
 			case "date":
-			case "relation":
 				return (
 					<input
 						type={field.type === "date" ? "date" : "text"}
 						value={value}
 						onChange={(e) => setFieldValue(field.id, e.target.value)}
-						placeholder={field.type === "relation" ? "Related entry ID" : "Image URL"}
+						placeholder="Image URL"
 						className={inputClass}
 					/>
 				)
@@ -112,7 +149,7 @@ export function EntryId() {
 	const e = entry as {
 		title: string
 		slug: string
-		collection?: { slug?: string; fields?: { id: number; name: string; type: string; required: boolean | null }[] }
+		collection?: { slug?: string; fields?: { id: number; name: string; type: string; required: boolean | null; config?: string | null }[] }
 	}
 	const collectionFields = e.collection?.fields ?? []
 
@@ -146,8 +183,15 @@ export function EntryId() {
 						{updateStatusMutation.isPending && <span className="mt-1 block text-xs text-[var(--sea-ink-soft)]">Updating...</span>}
 					</div>
 					<div>
-						<span className="text-xs font-medium text-[var(--sea-ink-soft)]">Slug</span>
-						<p className="text-sm text-[var(--sea-ink)]">/{e.slug}</p>
+						<label htmlFor="entry-edit-slug" className="mb-1 block text-xs font-medium text-[var(--sea-ink-soft)]">Slug</label>
+						<input
+							id="entry-edit-slug"
+							type="text"
+							value={slug}
+							onChange={(event) => setSlug(event.target.value)}
+							className="w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+						/>
+						<p className="mt-1 text-xs text-[var(--sea-ink-soft)]">Changing this creates a permanent redirect from /{e.slug}.</p>
 					</div>
 				</div>
 			</div>

@@ -7,28 +7,72 @@ import {
 	aiJobs,
 	aiUsageLog,
 	collectionFields,
+	collectionRedirects,
 	collections,
 	comments,
 	entries,
 	entryFields,
+	entryRedirects,
 	entryVersions,
 	media,
 	siteSettings,
 	trackingScripts,
 } from "../schema/index"
-import { getSiteUrl, pingIndexNow, pingSitemap } from "../seo"
-
-function slugify(text: string): string {
-	return text
-		.toLowerCase()
-		.trim()
-		.replace(/[^\w\s-]/g, "")
-		.replace(/[\s_]+/g, "-")
-		.replace(/-+/g, "-")
-}
+import { isPublicSettingKey, sanitizeComment, slugify } from "../security"
 
 const fieldTypeEnum = z.enum(["text", "richtext", "number", "boolean", "image", "relation", "date"])
+const relationConfigSchema = z.object({
+	targetCollectionId: z.number().int().positive(),
+	multiple: z.boolean().default(false),
+})
+const fieldConfigSchema = z.object({
+	relation: relationConfigSchema.optional(),
+}).optional()
 const requiredText = (label: string) => z.string().trim().min(1, `${label} is required`)
+
+export interface GearuMediaRecord {
+	id: number
+	filename: string
+	originalName: string
+	url: string
+	size: number
+	mimeType: string
+	width?: number | null
+	height?: number | null
+	altText?: string | null
+	caption?: string | null
+	focalX?: number | null
+	focalY?: number | null
+	variants?: string | null
+}
+
+export interface GearuStorageAdapter {
+	delete(record: GearuMediaRecord): Promise<void>
+}
+
+export interface GearuEntryLifecycleEvent {
+	entry: Record<string, unknown>
+	collection: Record<string, unknown>
+	url: string
+	previousSlug?: string
+}
+
+export interface GearuLifecycleHooks {
+	onEntryPublished?: (event: GearuEntryLifecycleEvent) => Promise<void> | void
+	onEntryUpdated?: (event: GearuEntryLifecycleEvent) => Promise<void> | void
+	onEntrySlugChanged?: (event: GearuEntryLifecycleEvent) => Promise<void> | void
+}
+
+export interface GearuCommentPolicy {
+	/** Require an authenticated, email-verified user before accepting a comment. */
+	requireVerifiedMember?: boolean
+	sanitize?: (content: string) => string
+	/** Return a pre-hashed identifier. Raw IP addresses must never be persisted. */
+	getRateLimitKey?: (request: { headers?: Headers; userId?: string }) => Promise<string | null> | string | null
+	checkRateLimit?: (key: string) => Promise<boolean> | boolean
+	scoreSpam?: (comment: { content: string; authorName: string; authorEmail: string }) => Promise<number> | number
+	spamThreshold?: number
+}
 
 export interface CreateGearuRouterContext {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,10 +82,42 @@ export interface CreateGearuRouterContext {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protectedProcedure: any
 	TRPCError?: typeof TRPCError
+	siteUrl?: string
+	storage?: GearuStorageAdapter
+	lifecycle?: GearuLifecycleHooks
+	comments?: GearuCommentPolicy
+	/** Schedule post-response work in Workers, or omit to await hooks inline. */
+	waitUntil?: (promise: Promise<void>) => void
+	isPublicSettingAllowed?: (key: string) => boolean
+	isTrackingScriptAllowed?: (script: { id: number; name: string; location: string }) => boolean
+}
+
+function encodeFieldConfig(config: z.infer<typeof fieldConfigSchema>): string | null {
+	return config ? JSON.stringify(config) : null
+}
+
+function schedule(ctx: CreateGearuRouterContext, work: Promise<void>): Promise<void> {
+	if (ctx.waitUntil) {
+		ctx.waitUntil(work)
+		return Promise.resolve()
+	}
+	return work
+}
+
+function forbidden(ctx: CreateGearuRouterContext, message: string): Error {
+	const ErrorConstructor = ctx.TRPCError
+	if (ErrorConstructor) return new ErrorConstructor({ code: "FORBIDDEN", message })
+	return new Error(message)
+}
+
+function tooManyRequests(ctx: CreateGearuRouterContext): Error {
+	const ErrorConstructor = ctx.TRPCError
+	if (ErrorConstructor) return new ErrorConstructor({ code: "TOO_MANY_REQUESTS", message: "Too many comments" })
+	return new Error("Too many comments")
 }
 
 export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
-	const { db, protectedProcedure } = ctx
+	const { db, publicProcedure, protectedProcedure } = ctx
 
 	return {
 		list: protectedProcedure.query(async () => {
@@ -86,6 +162,7 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 			}))
 			.mutation(async (opts: { input: { id: number; name?: string; slug?: string; description?: string } }) => {
 				const { id, ...data } = opts.input
+				const current = await db.query.collections.findFirst({ where: eq(collections.id, id) })
 				const [collection] = await db
 					.update(collections)
 					.set({
@@ -96,7 +173,25 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 					})
 					.where(eq(collections.id, id))
 					.returning()
+				if (current && collection && current.slug !== collection.slug) {
+					await db.insert(collectionRedirects).values({
+						collectionId: id,
+						oldSlug: current.slug,
+						newSlug: collection.slug,
+					})
+				}
 				return collection
+			}),
+
+		resolveRedirect: publicProcedure
+			.input(z.object({ slug: z.string() }))
+			.query(async (opts: { input: { slug: string } }) => {
+				return db.query.collectionRedirects.findFirst({
+					where: eq(collectionRedirects.oldSlug, opts.input.slug),
+					orderBy: (table: typeof collectionRedirects, helpers: { desc: typeof desc }) => [
+						helpers.desc(table.createdAt),
+					],
+				})
 			}),
 
 		delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async (opts: { input: { id: number } }) => {
@@ -111,8 +206,9 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 				slug: z.string().trim().optional(),
 				type: fieldTypeEnum,
 				required: z.boolean().default(false),
+				config: fieldConfigSchema,
 			}))
-			.mutation(async (opts: { input: { collectionId: number; name: string; slug?: string; type: z.infer<typeof fieldTypeEnum>; required: boolean } }) => {
+			.mutation(async (opts: { input: { collectionId: number; name: string; slug?: string; type: z.infer<typeof fieldTypeEnum>; required: boolean; config?: z.infer<typeof fieldConfigSchema> } }) => {
 				const name = opts.input.name.trim()
 				const slug = opts.input.slug?.trim() || slugify(name)
 				const existing = await db.query.collectionFields.findMany({
@@ -127,6 +223,7 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 						type: opts.input.type,
 						required: opts.input.required,
 						sortOrder: existing.length,
+						config: encodeFieldConfig(opts.input.config),
 					})
 					.returning()
 				return field
@@ -139,15 +236,17 @@ export function createCollectionsRouter(ctx: CreateGearuRouterContext) {
 				slug: z.string().trim().optional(),
 				type: fieldTypeEnum.optional(),
 				required: z.boolean().optional(),
+				config: fieldConfigSchema,
 			}))
-			.mutation(async (opts: { input: { id: number; name?: string; slug?: string; type?: z.infer<typeof fieldTypeEnum>; required?: boolean } }) => {
-				const { id, ...data } = opts.input
+			.mutation(async (opts: { input: { id: number; name?: string; slug?: string; type?: z.infer<typeof fieldTypeEnum>; required?: boolean; config?: z.infer<typeof fieldConfigSchema> } }) => {
+				const { id, config, ...data } = opts.input
 				const [field] = await db
 					.update(collectionFields)
 					.set({
 						...data,
 						name: data.name?.trim(),
 						slug: data.slug?.trim(),
+						...(config !== undefined ? { config: encodeFieldConfig(config) } : {}),
 					})
 					.where(eq(collectionFields.id, id))
 					.returning()
@@ -186,6 +285,25 @@ async function createVersion(db: CreateGearuRouterContext["db"], entryId: number
 		dataSnapshot: snapshot,
 		createdBy,
 	})
+}
+
+function makeEntryUrl(
+	ctx: CreateGearuRouterContext,
+	collectionSlug: string,
+	entrySlug: string,
+): string {
+	const base = (ctx.siteUrl ?? "").replace(/\/$/, "")
+	return `${base}/${collectionSlug}/${entrySlug}`
+}
+
+async function runEntryHook(
+	ctx: CreateGearuRouterContext,
+	hook: keyof GearuLifecycleHooks,
+	event: GearuEntryLifecycleEvent,
+): Promise<void> {
+	const callback = ctx.lifecycle?.[hook]
+	if (!callback) return
+	await schedule(ctx, Promise.resolve(callback(event)))
 }
 
 export function createEntriesRouter(ctx: CreateGearuRouterContext) {
@@ -313,15 +431,15 @@ export function createEntriesRouter(ctx: CreateGearuRouterContext) {
 
 				await createVersion(db, entry.id, opts.ctx.session?.user?.id)
 
-				if (opts.input.status === "published") {
-					const collection = await db.query.collections.findFirst({
-						where: eq(collections.id, opts.input.collectionId),
+				const collection = await db.query.collections.findFirst({
+					where: eq(collections.id, opts.input.collectionId),
+				})
+				if (opts.input.status === "published" && collection) {
+					await runEntryHook(ctx, "onEntryPublished", {
+						entry,
+						collection,
+						url: makeEntryUrl(ctx, collection.slug, slug),
 					})
-					if (collection) {
-						const url = `${getSiteUrl()}/${collection.slug}/${slug}`
-						pingIndexNow([url]).catch(() => {})
-						pingSitemap().catch(() => {})
-					}
 				}
 
 				return entry
@@ -352,6 +470,10 @@ export function createEntriesRouter(ctx: CreateGearuRouterContext) {
 				ctx: { session?: { user?: { id?: string } } | null }
 			}) => {
 				const { id, fields, ...data } = opts.input
+				const previous = await db.query.entries.findFirst({
+					where: eq(entries.id, id),
+					with: { collection: true },
+				})
 
 				await db.update(entries).set({ ...data, updatedAt: new Date() }).where(eq(entries.id, id))
 
@@ -369,7 +491,35 @@ export function createEntriesRouter(ctx: CreateGearuRouterContext) {
 				}
 
 				await createVersion(db, id, opts.ctx.session?.user?.id)
-				return db.query.entries.findFirst({ where: eq(entries.id, id) })
+				const updated = await db.query.entries.findFirst({
+					where: eq(entries.id, id),
+					with: { collection: true },
+				})
+
+				if (previous && updated?.collection && previous.slug !== updated.slug) {
+					await db.insert(entryRedirects).values({
+						entryId: id,
+						collectionSlug: updated.collection.slug,
+						oldSlug: previous.slug,
+						newSlug: updated.slug,
+					})
+					await runEntryHook(ctx, "onEntrySlugChanged", {
+						entry: updated,
+						collection: updated.collection,
+						url: makeEntryUrl(ctx, updated.collection.slug, updated.slug),
+						previousSlug: previous.slug,
+					})
+				}
+
+				if (updated?.collection && updated.status === "published") {
+					await runEntryHook(ctx, "onEntryUpdated", {
+						entry: updated,
+						collection: updated.collection,
+						url: makeEntryUrl(ctx, updated.collection.slug, updated.slug),
+					})
+				}
+
+				return updated
 			}),
 
 		updateStatus: protectedProcedure
@@ -391,9 +541,11 @@ export function createEntriesRouter(ctx: CreateGearuRouterContext) {
 						where: eq(collections.id, entry.collectionId),
 					})
 					if (collection) {
-						const url = `${getSiteUrl()}/${collection.slug}/${entry.slug}`
-						pingIndexNow([url]).catch(() => {})
-						pingSitemap().catch(() => {})
+						await runEntryHook(ctx, "onEntryPublished", {
+							entry,
+							collection,
+							url: makeEntryUrl(ctx, collection.slug, entry.slug),
+						})
 					}
 				}
 
@@ -404,6 +556,20 @@ export function createEntriesRouter(ctx: CreateGearuRouterContext) {
 			await db.delete(entries).where(eq(entries.id, opts.input.id))
 			return { success: true }
 		}),
+
+		resolveRedirect: publicProcedure
+			.input(z.object({ collectionSlug: z.string(), entrySlug: z.string() }))
+			.query(async (opts: { input: { collectionSlug: string; entrySlug: string } }) => {
+				return db.query.entryRedirects.findFirst({
+					where: and(
+						eq(entryRedirects.collectionSlug, opts.input.collectionSlug),
+						eq(entryRedirects.oldSlug, opts.input.entrySlug),
+					),
+					orderBy: (table: typeof entryRedirects, helpers: { desc: typeof desc }) => [
+						helpers.desc(table.createdAt),
+					],
+				})
+			}),
 
 		getVersions: protectedProcedure.input(z.object({ entryId: z.number() })).query(async (opts: { input: { entryId: number } }) => {
 			return db.select().from(entryVersions).where(eq(entryVersions.entryId, opts.input.entryId)).orderBy(desc(entryVersions.versionNumber))
@@ -466,20 +632,52 @@ export function createMediaRouter(ctx: CreateGearuRouterContext) {
 			})
 		}),
 
+		updateMetadata: protectedProcedure
+			.input(z.object({
+				id: z.number(),
+				altText: z.string().max(500).nullable().optional(),
+				caption: z.string().max(2000).nullable().optional(),
+				width: z.number().int().positive().nullable().optional(),
+				height: z.number().int().positive().nullable().optional(),
+				focalX: z.number().int().min(0).max(100).nullable().optional(),
+				focalY: z.number().int().min(0).max(100).nullable().optional(),
+				variants: z.array(z.object({
+					url: z.string().url(),
+					width: z.number().int().positive(),
+					height: z.number().int().positive(),
+					format: z.enum(["avif", "webp", "jpeg", "png"]),
+				})).optional(),
+			}))
+			.mutation(async (opts: {
+				input: {
+					id: number
+					altText?: string | null
+					caption?: string | null
+					width?: number | null
+					height?: number | null
+					focalX?: number | null
+					focalY?: number | null
+					variants?: Array<{ url: string; width: number; height: number; format: "avif" | "webp" | "jpeg" | "png" }>
+				}
+			}) => {
+				const { id, variants, ...metadata } = opts.input
+				const [record] = await db
+					.update(media)
+					.set({
+						...metadata,
+						...(variants !== undefined ? { variants: JSON.stringify(variants) } : {}),
+					})
+					.where(eq(media.id, id))
+					.returning()
+				return record
+			}),
+
 		delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async (opts: { input: { id: number } }) => {
 			const item = await db.query.media.findFirst({
 				where: eq(media.id, opts.input.id),
 			})
 			if (item) {
-				try {
-					const fs = await import("node:fs/promises")
-					const path = await import("node:path")
-					const filePath = path.join(process.cwd(), "public", item.url)
-					await fs.unlink(filePath).catch(() => {})
-				} catch {
-					// Ignore missing files when cleaning up media records.
-				}
-
+				if (ctx.storage) await ctx.storage.delete(item as GearuMediaRecord)
 				await db.delete(media).where(eq(media.id, opts.input.id))
 			}
 
@@ -517,8 +715,47 @@ export function createCommentsRouter(ctx: CreateGearuRouterContext) {
 
 		submit: publicProcedure
 			.input(z.object({ entryId: z.number(), authorName: z.string().min(1), authorEmail: z.string().email(), content: z.string().min(1) }))
-			.mutation(async (opts: { input: { entryId: number; authorName: string; authorEmail: string; content: string } }) => {
-				const [comment] = await db.insert(comments).values({ ...opts.input, status: "pending" }).returning()
+			.mutation(async (opts: {
+				input: { entryId: number; authorName: string; authorEmail: string; content: string }
+				ctx: {
+					headers?: Headers
+					session?: { user?: { id?: string; email?: string; emailVerified?: boolean } } | null
+				}
+			}) => {
+				const member = opts.ctx.session?.user
+				if (ctx.comments?.requireVerifiedMember && (!member?.id || !member.emailVerified)) {
+					throw forbidden(ctx, "A verified account is required to comment")
+				}
+
+				const verifiedUserId = member?.id && member.emailVerified ? member.id : undefined
+				const rateLimitKey = await ctx.comments?.getRateLimitKey?.({
+					headers: opts.ctx.headers,
+					userId: verifiedUserId,
+				})
+				if (rateLimitKey && ctx.comments?.checkRateLimit && !(await ctx.comments.checkRateLimit(rateLimitKey))) {
+					throw tooManyRequests(ctx)
+				}
+
+				const sanitize = ctx.comments?.sanitize ?? sanitizeComment
+				const content = sanitize(opts.input.content)
+				if (!content) throw forbidden(ctx, "Comment content is empty")
+				const spamScore = await ctx.comments?.scoreSpam?.({
+					content,
+					authorName: opts.input.authorName,
+					authorEmail: opts.input.authorEmail,
+				}) ?? 0
+				const status = spamScore >= (ctx.comments?.spamThreshold ?? 80) ? "rejected" : "pending"
+
+				const [comment] = await db.insert(comments).values({
+					...opts.input,
+					authorName: verifiedUserId ? (opts.input.authorName || "Member") : opts.input.authorName,
+					authorEmail: verifiedUserId ? (member?.email ?? opts.input.authorEmail) : opts.input.authorEmail,
+					userId: verifiedUserId ?? null,
+					content,
+					status,
+					rateLimitKey: rateLimitKey ?? null,
+					spamScore,
+				}).returning()
 				return comment
 			}),
 
@@ -535,7 +772,17 @@ export function createCommentsRouter(ctx: CreateGearuRouterContext) {
 		}),
 
 		getByEntry: publicProcedure.input(z.object({ entryId: z.number() })).query(async (opts: { input: { entryId: number } }) => {
-			return db.select().from(comments).where(eq(comments.entryId, opts.input.entryId)).orderBy(desc(comments.createdAt))
+			return db
+				.select({
+					id: comments.id,
+					entryId: comments.entryId,
+					authorName: comments.authorName,
+					content: comments.content,
+					createdAt: comments.createdAt,
+				})
+				.from(comments)
+				.where(and(eq(comments.entryId, opts.input.entryId), eq(comments.status, "approved")))
+				.orderBy(desc(comments.createdAt))
 		}),
 	} satisfies TRPCRouterRecord
 }
@@ -555,7 +802,8 @@ export function createSettingsRouter(ctx: CreateGearuRouterContext) {
 			const rows = await db.select().from(siteSettings)
 			const settings: Record<string, string> = {}
 			for (const row of rows) {
-				if (row.key.startsWith("ai_api_key_")) continue
+				const allowed = ctx.isPublicSettingAllowed?.(row.key) ?? isPublicSettingKey(row.key)
+				if (!allowed) continue
 				settings[row.key] = row.value
 			}
 			return settings
@@ -644,15 +892,15 @@ export function createSettingsRouter(ctx: CreateGearuRouterContext) {
 		}),
 
 		createScript: protectedProcedure
-			.input(z.object({ name: z.string().min(1), location: z.enum(["head", "body_start", "body_end"]), script: z.string().min(1), active: z.boolean().default(true) }))
-			.mutation(async (opts: { input: { name: string; location: "head" | "body_start" | "body_end"; script: string; active: boolean } }) => {
+			.input(z.object({ name: z.string().min(1), location: z.enum(["head", "body_start", "body_end"]), script: z.string().min(1), active: z.boolean().default(true), trusted: z.boolean().default(false) }))
+			.mutation(async (opts: { input: { name: string; location: "head" | "body_start" | "body_end"; script: string; active: boolean; trusted: boolean } }) => {
 				const [script] = await db.insert(trackingScripts).values(opts.input).returning()
 				return script
 			}),
 
 		updateScript: protectedProcedure
-			.input(z.object({ id: z.number(), name: z.string().optional(), location: z.enum(["head", "body_start", "body_end"]).optional(), script: z.string().optional(), active: z.boolean().optional() }))
-			.mutation(async (opts: { input: { id: number; name?: string; location?: "head" | "body_start" | "body_end"; script?: string; active?: boolean } }) => {
+			.input(z.object({ id: z.number(), name: z.string().optional(), location: z.enum(["head", "body_start", "body_end"]).optional(), script: z.string().optional(), active: z.boolean().optional(), trusted: z.boolean().optional() }))
+			.mutation(async (opts: { input: { id: number; name?: string; location?: "head" | "body_start" | "body_end"; script?: string; active?: boolean; trusted?: boolean } }) => {
 				const { id, ...data } = opts.input
 				const [script] = await db.update(trackingScripts).set(data).where(eq(trackingScripts.id, id)).returning()
 				return script
@@ -664,7 +912,18 @@ export function createSettingsRouter(ctx: CreateGearuRouterContext) {
 		}),
 
 		getActiveScripts: publicProcedure.query(async () => {
-			return db.select().from(trackingScripts).where(eq(trackingScripts.active, true))
+			const scripts = await db
+				.select({
+					id: trackingScripts.id,
+					name: trackingScripts.name,
+					location: trackingScripts.location,
+					script: trackingScripts.script,
+				})
+				.from(trackingScripts)
+				.where(and(eq(trackingScripts.active, true), eq(trackingScripts.trusted, true)))
+			return scripts.filter((script: { id: number; name: string; location: string }) =>
+				ctx.isTrackingScriptAllowed?.(script) ?? false,
+			)
 		}),
 	} satisfies TRPCRouterRecord
 }
@@ -896,7 +1155,7 @@ export function createAiRouter(ctx: CreateGearuRouterContext) {
 
 export function createGearuMetaRouter(ctx: CreateGearuRouterContext) {
 	const { protectedProcedure } = ctx
-	const installedVersion = "1.0.0"
+	const installedVersion = "1.5.0"
 
 	return {
 		getVersion: protectedProcedure.query(async () => {

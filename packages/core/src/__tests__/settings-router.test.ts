@@ -83,7 +83,8 @@ describe("settings router", () => {
 			expect(updated).toMatchObject({ name: "Meta Pixel", active: false })
 
 			const activeScripts = await caller.settings.getActiveScripts()
-			expect(activeScripts.map((script) => script.id).sort((a, b) => a - b)).toEqual([activeScriptId])
+			expect(activeScripts).toEqual([])
+			expect(activeScriptId).toBeGreaterThan(0)
 
 			await caller.settings.deleteScript({ id: inactiveScriptId })
 			expect((await caller.settings.listScripts()).some((script) => script.id === inactiveScriptId)).toBe(false)

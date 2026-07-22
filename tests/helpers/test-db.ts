@@ -313,6 +313,7 @@ CREATE TABLE user (
 	id TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
 	email TEXT NOT NULL UNIQUE,
+	role TEXT NOT NULL DEFAULT 'member',
 	email_verified INTEGER NOT NULL DEFAULT 0,
 	image TEXT,
 	created_at INTEGER NOT NULL DEFAULT (unixepoch()),
@@ -365,6 +366,15 @@ CREATE TABLE collections (
 	created_at INTEGER DEFAULT (unixepoch())
 );
 
+CREATE TABLE collection_redirects (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	collection_id INTEGER NOT NULL,
+	old_slug TEXT NOT NULL,
+	new_slug TEXT NOT NULL,
+	created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+	FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
+);
+
 CREATE TABLE collection_fields (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	collection_id INTEGER NOT NULL,
@@ -373,6 +383,7 @@ CREATE TABLE collection_fields (
 	type TEXT NOT NULL,
 	required INTEGER DEFAULT 0,
 	sort_order INTEGER DEFAULT 0,
+	config TEXT,
 	FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
 );
 
@@ -410,6 +421,16 @@ CREATE TABLE entry_versions (
 	FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE
 );
 
+CREATE TABLE entry_redirects (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	entry_id INTEGER NOT NULL,
+	collection_slug TEXT NOT NULL,
+	old_slug TEXT NOT NULL,
+	new_slug TEXT NOT NULL,
+	created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+	FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE
+);
+
 CREATE TABLE media (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	filename TEXT NOT NULL,
@@ -419,6 +440,11 @@ CREATE TABLE media (
 	mime_type TEXT NOT NULL,
 	width INTEGER,
 	height INTEGER,
+	alt_text TEXT,
+	caption TEXT,
+	focal_x INTEGER,
+	focal_y INTEGER,
+	variants TEXT,
 	created_at INTEGER DEFAULT (unixepoch())
 );
 
@@ -427,10 +453,14 @@ CREATE TABLE comments (
 	entry_id INTEGER NOT NULL,
 	author_name TEXT NOT NULL,
 	author_email TEXT NOT NULL,
+	user_id TEXT,
 	content TEXT NOT NULL,
+	rate_limit_key TEXT,
+	spam_score INTEGER DEFAULT 0,
 	status TEXT NOT NULL DEFAULT 'pending',
 	created_at INTEGER DEFAULT (unixepoch()),
-	FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE
+	FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE,
+	FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
 );
 
 CREATE TABLE tracking_scripts (
@@ -439,6 +469,7 @@ CREATE TABLE tracking_scripts (
 	location TEXT NOT NULL,
 	script TEXT NOT NULL,
 	active INTEGER DEFAULT 1,
+	trusted INTEGER NOT NULL DEFAULT 0,
 	created_at INTEGER DEFAULT (unixepoch())
 );
 

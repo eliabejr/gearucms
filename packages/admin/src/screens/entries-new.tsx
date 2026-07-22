@@ -4,15 +4,9 @@ import { useState, Suspense } from "react"
 import { useGearuAdmin } from "../context"
 import Select from "../components/select"
 import SeoAnalyzer from "../components/seo-analyzer"
+import { slugify } from "@gearu/core/seo"
 
-export function slugify(text: string) {
-	return text
-		.toLowerCase()
-		.trim()
-		.replace(/[^\w\s-]/g, "")
-		.replace(/[\s_]+/g, "-")
-		.replace(/-+/g, "-")
-}
+export { slugify }
 
 export function EntriesNew() {
 	const { useTRPC, basePath, navigate, RichTextEditor } = useGearuAdmin()
@@ -21,7 +15,10 @@ export function EntriesNew() {
 			list: { queryOptions: () => { queryKey: unknown[] } }
 			getById: { queryOptions: (opts: { id: number }, opts2?: { enabled: boolean }) => { queryKey: unknown[] } }
 		}
-		entries: { create: { mutationOptions: (opts: { onSuccess: (entry: { id: number }) => void }) => unknown } }
+		entries: {
+			list: { queryOptions: (opts: { limit: number }) => { queryKey: unknown[] } }
+			create: { mutationOptions: (opts: { onSuccess: (entry: { id: number }) => void }) => unknown }
+		}
 	}
 	const [selectedCollectionId, setSelectedCollectionId] = useState<number | undefined>()
 	const [title, setTitle] = useState("")
@@ -34,6 +31,7 @@ export function EntriesNew() {
 	const [fieldValues, setFieldValues] = useState<Record<number, string | null>>({})
 
 	const { data: collections, isLoading: collectionsLoading } = useQuery(trpc.collections.list.queryOptions())
+	const { data: relationEntries } = useQuery(trpc.entries.list.queryOptions({ limit: 500 }))
 	const collectionQuery = selectedCollectionId
 		? trpc.collections.getById.queryOptions({ id: selectedCollectionId }, { enabled: true })
 		: {
@@ -80,7 +78,7 @@ export function EntriesNew() {
 		})
 	}
 
-	const renderFieldInput = (field: { id: number; name: string; type: string; required: boolean | null }) => {
+	const renderFieldInput = (field: { id: number; name: string; type: string; required: boolean | null; config?: string | null }) => {
 		const value = fieldValues[field.id] ?? ""
 		const inputClasses = "w-full rounded-lg border border-[var(--line)] bg-[var(--foam)] px-3 py-2 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)] transition"
 		switch (field.type) {
@@ -131,9 +129,43 @@ export function EntriesNew() {
 						<span className="text-sm text-[var(--sea-ink-soft)]">{value === "true" ? "Yes" : "No"}</span>
 					</label>
 				)
+			case "relation": {
+				const config = field.config ? JSON.parse(field.config) as { relation?: { targetCollectionId?: number; multiple?: boolean } } : {}
+				const targetId = config.relation?.targetCollectionId
+				const options = Array.isArray(relationEntries)
+					? (relationEntries as Array<{ id: number; title: string; collection?: { id?: number } }>).filter(
+							(entry) => !targetId || entry.collection?.id === targetId,
+						)
+					: []
+				const selected = config.relation?.multiple
+					? (() => {
+							try { return JSON.parse(value || "[]") as number[] } catch { return [] }
+						})()
+					: []
+				return config.relation?.multiple ? (
+					<select
+						multiple
+						value={selected.map(String)}
+						onChange={(event) => setFieldValue(field.id, JSON.stringify(
+							Array.from(event.currentTarget.selectedOptions, (option) => Number(option.value)),
+						))}
+						required={!!field.required}
+						className={`${inputClasses} min-h-28`}
+					>
+						{options.map((entry) => <option key={entry.id} value={entry.id}>{entry.title}</option>)}
+					</select>
+				) : (
+					<Select
+						value={value}
+						onChange={(next) => setFieldValue(field.id, next || null)}
+						options={options.map((entry) => ({ value: String(entry.id), label: entry.title }))}
+						placeholder="Select related entry"
+						isClearable
+					/>
+				)
+			}
 			case "image":
 			case "date":
-			case "relation":
 			default:
 				return (
 					<input
@@ -141,14 +173,14 @@ export function EntriesNew() {
 						value={value}
 						onChange={(e) => setFieldValue(field.id, e.target.value)}
 						required={!!field.required}
-						placeholder={field.type === "image" ? "Image URL" : field.type === "relation" ? "Related entry ID" : `Enter ${field.name.toLowerCase()}`}
+						placeholder={field.type === "image" ? "Image URL" : `Enter ${field.name.toLowerCase()}`}
 						className={inputClasses}
 					/>
 				)
 		}
 	}
 
-	const col = collection as { fields?: { id: number; name: string; type: string; required: boolean | null }[] } | undefined
+	const col = collection as { fields?: { id: number; name: string; type: string; required: boolean | null; config?: string | null }[] } | undefined
 	const cols = Array.isArray(collections) ? (collections as { id: number; name: string }[]) : []
 
 	return (

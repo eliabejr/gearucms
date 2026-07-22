@@ -31,16 +31,17 @@ describe("comments router", () => {
 			expect(await caller.comments.list()).toHaveLength(3)
 			expect(await caller.comments.list({ status: "pending" })).toHaveLength(1)
 			expect(await caller.comments.list({ status: "approved" })).toHaveLength(1)
-			expect(await caller.comments.getByEntry({ entryId })).toHaveLength(3)
+			expect(await caller.comments.getByEntry({ entryId })).toHaveLength(1)
 
 			const moderated = await caller.comments.moderate({ id: submitted.id, status: "approved" })
 			expect(moderated.status).toBe("approved")
+			expect(await caller.comments.getByEntry({ entryId })).toHaveLength(2)
 
 			await caller.comments.moderate({ id: approvedId, status: "rejected" })
 			expect(await caller.comments.list({ status: "rejected" })).toHaveLength(2)
 
 			await caller.comments.delete({ id: submitted.id })
-			expect(await caller.comments.getByEntry({ entryId })).toHaveLength(2)
+			expect(await caller.comments.getByEntry({ entryId })).toHaveLength(0)
 		} finally {
 			destroyTestDb(testDb.connection)
 		}

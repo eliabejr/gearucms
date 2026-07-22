@@ -300,17 +300,13 @@ export async function pingIndexNow(urls: string[]): Promise<boolean> {
   }
 }
 
-/** Ping Google with the sitemap URL (best-effort). */
+/**
+ * @deprecated Google retired the unauthenticated sitemap ping endpoint.
+ * Submit sitemaps through Search Console and keep this no-op only for source
+ * compatibility with Gearu 1.4 integrations.
+ */
 export async function pingSitemap(): Promise<void> {
-  const siteUrl = getSiteUrl()
-  const sitemapUrl = `${siteUrl}/api/sitemap`
-  try {
-    await fetch(
-      `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
-    )
-  } catch {
-    // best-effort
-  }
+	return Promise.resolve()
 }
 
 // ---------------------------------------------------------------------------

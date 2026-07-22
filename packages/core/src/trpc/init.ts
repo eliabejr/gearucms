@@ -18,10 +18,22 @@ export interface GearuTRPCFactoryResult {
 	protectedProcedure: any
 }
 
+export interface CreateGearuTRPCOptions<TContext> {
+	/**
+	 * Authorize calls made through `protectedProcedure`.
+	 *
+	 * The default preserves the pre-1.5 behavior (any authenticated user).
+	 * Multi-role applications should require an editorial role here.
+	 */
+	authorizeProtected?: (ctx: TContext) => boolean | Promise<boolean>
+}
+
 /**
  * Creates the shared tRPC primitives Gearu expects on the host app.
  */
-export function createGearuTRPC<TContext extends GearuTRPCContext = GearuTRPCContext>(): GearuTRPCFactoryResult {
+export function createGearuTRPC<TContext extends GearuTRPCContext = GearuTRPCContext>(
+	options: CreateGearuTRPCOptions<TContext> = {},
+): GearuTRPCFactoryResult {
 	const t = initTRPC.context<TContext>().create({
 		transformer: superjson,
 		errorFormatter({ shape, error }) {
@@ -45,6 +57,9 @@ export function createGearuTRPC<TContext extends GearuTRPCContext = GearuTRPCCon
 		const session = (ctx as GearuTRPCContext).session
 		if (!session || typeof session !== "object" || !("user" in session) || !session.user) {
 			throw new TRPCError({ code: "UNAUTHORIZED" })
+		}
+		if (options.authorizeProtected && !(await options.authorizeProtected(ctx as TContext))) {
+			throw new TRPCError({ code: "FORBIDDEN" })
 		}
 
 		return next({ ctx })

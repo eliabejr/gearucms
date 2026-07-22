@@ -19,6 +19,7 @@ export function CollectionId() {
 	const id = params?.id ? Number(params.id) : NaN
 	const trpc = useTRPC() as {
 		collections: {
+			list: { queryOptions: () => { queryKey: unknown[] } }
 			getById: { queryOptions: (opts: { id: number }) => { queryKey: unknown[] } }
 			update: { mutationOptions: (opts: { onSuccess: () => void }) => unknown }
 			addField: { mutationOptions: (opts: { onSuccess: () => void }) => unknown }
@@ -27,6 +28,7 @@ export function CollectionId() {
 		}
 	}
 	const queryClient = useQueryClient()
+	const { data: allCollections } = useQuery(trpc.collections.list.queryOptions())
 	const { data: collection, isLoading } = useQuery(trpc.collections.getById.queryOptions({ id }))
 	const [editName, setEditName] = useState("")
 	const [editDesc, setEditDesc] = useState("")
@@ -34,11 +36,15 @@ export function CollectionId() {
 	const [newFieldName, setNewFieldName] = useState("")
 	const [newFieldType, setNewFieldType] = useState<string>("text")
 	const [newFieldRequired, setNewFieldRequired] = useState(false)
+	const [newRelationTarget, setNewRelationTarget] = useState<number | undefined>()
+	const [newRelationMultiple, setNewRelationMultiple] = useState(false)
 	const [showAddField, setShowAddField] = useState(false)
 	const [editingFieldId, setEditingFieldId] = useState<number | null>(null)
 	const [editFieldName, setEditFieldName] = useState("")
 	const [editFieldType, setEditFieldType] = useState("text")
 	const [editFieldRequired, setEditFieldRequired] = useState(false)
+	const [editRelationTarget, setEditRelationTarget] = useState<number | undefined>()
+	const [editRelationMultiple, setEditRelationMultiple] = useState(false)
 
 	const invalidate = () => {
 		queryClient.invalidateQueries({ queryKey: trpc.collections.getById.queryKey({ id }) })
@@ -53,6 +59,8 @@ export function CollectionId() {
 				setNewFieldName("")
 				setNewFieldType("text")
 				setNewFieldRequired(false)
+				setNewRelationTarget(undefined)
+				setNewRelationMultiple(false)
 				setShowAddField(false)
 			},
 		}),
@@ -64,11 +72,14 @@ export function CollectionId() {
 	)
 	const removeFieldMutation = useMutation(trpc.collections.removeField.mutationOptions({ onSuccess: invalidate }))
 
-	const startEditField = (field: { id: number; name: string; type: string; required: boolean | null }) => {
+	const startEditField = (field: { id: number; name: string; type: string; required: boolean | null; config?: string | null }) => {
+		const config = field.config ? JSON.parse(field.config) as { relation?: { targetCollectionId?: number; multiple?: boolean } } : {}
 		setEditingFieldId(field.id)
 		setEditFieldName(field.name)
 		setEditFieldType(field.type)
 		setEditFieldRequired(field.required ?? false)
+		setEditRelationTarget(config.relation?.targetCollectionId)
+		setEditRelationMultiple(config.relation?.multiple ?? false)
 	}
 
 	if (isLoading) {
@@ -78,7 +89,10 @@ export function CollectionId() {
 		return <div className="py-12 text-center text-sm text-[var(--sea-ink-soft)]">Collection not found</div>
 	}
 
-	const col = collection as { id: number; name: string; slug: string; description?: string; fields?: { id: number; name: string; slug: string; type: string; required: boolean | null }[] }
+	const col = collection as { id: number; name: string; slug: string; description?: string; fields?: { id: number; name: string; slug: string; type: string; required: boolean | null; config?: string | null }[] }
+	const collectionOptions = Array.isArray(allCollections)
+		? (allCollections as Array<{ id: number; name: string }>).map((item) => ({ value: String(item.id), label: item.name }))
+		: []
 
 	return (
 		<div>
@@ -155,6 +169,9 @@ export function CollectionId() {
 								name: newFieldName,
 								type: newFieldType as "text",
 								required: newFieldRequired,
+								config: newFieldType === "relation" && newRelationTarget
+									? { relation: { targetCollectionId: newRelationTarget, multiple: newRelationMultiple } }
+									: undefined,
 							})
 						}}
 						className="mb-4 flex flex-wrap items-end gap-3 rounded-lg bg-[var(--foam)] p-4"
@@ -186,6 +203,24 @@ export function CollectionId() {
 							<input type="checkbox" checked={newFieldRequired} onChange={(e) => setNewFieldRequired(e.target.checked)} className="rounded" />
 							Required
 						</label>
+						{newFieldType === "relation" && (
+							<>
+								<div className="min-w-[180px]">
+									<label className="mb-1 block text-xs font-medium text-[var(--sea-ink-soft)]">Target collection</label>
+									<Select
+										value={newRelationTarget?.toString() ?? ""}
+										onChange={(value) => setNewRelationTarget(value ? Number(value) : undefined)}
+										options={collectionOptions}
+										placeholder="Choose collection"
+										size="sm"
+									/>
+								</div>
+								<label className="flex items-center gap-2 text-sm text-[var(--sea-ink-soft)]">
+									<input type="checkbox" checked={newRelationMultiple} onChange={(event) => setNewRelationMultiple(event.target.checked)} />
+									Allow multiple
+								</label>
+							</>
+						)}
 						<button type="submit" disabled={addFieldMutation.isPending} className="btn-primary">Add</button>
 					</form>
 				)}
@@ -199,7 +234,15 @@ export function CollectionId() {
 									<form
 										onSubmit={(e) => {
 											e.preventDefault()
-											updateFieldMutation.mutate({ id: field.id, name: editFieldName, type: editFieldType as "text", required: editFieldRequired } as any)
+											updateFieldMutation.mutate({
+												id: field.id,
+												name: editFieldName,
+												type: editFieldType as "text",
+												required: editFieldRequired,
+												config: editFieldType === "relation" && editRelationTarget
+													? { relation: { targetCollectionId: editRelationTarget, multiple: editRelationMultiple } }
+													: undefined,
+											} as any)
 										}}
 										className="flex flex-wrap items-end gap-3 p-3"
 									>
@@ -228,6 +271,24 @@ export function CollectionId() {
 											<input type="checkbox" checked={editFieldRequired} onChange={(e) => setEditFieldRequired(e.target.checked)} className="rounded" />
 											Required
 										</label>
+										{editFieldType === "relation" && (
+											<>
+												<div className="min-w-[180px]">
+													<label className="mb-1 block text-xs font-medium text-[var(--sea-ink-soft)]">Target collection</label>
+													<Select
+														value={editRelationTarget?.toString() ?? ""}
+														onChange={(value) => setEditRelationTarget(value ? Number(value) : undefined)}
+														options={collectionOptions}
+														placeholder="Choose collection"
+														size="sm"
+													/>
+												</div>
+												<label className="flex items-center gap-2 text-sm text-[var(--sea-ink-soft)] pb-1">
+													<input type="checkbox" checked={editRelationMultiple} onChange={(event) => setEditRelationMultiple(event.target.checked)} />
+													Allow multiple
+												</label>
+											</>
+										)}
 										<div className="flex gap-2 pb-0.5">
 											<button type="submit" disabled={updateFieldMutation.isPending} className="flex items-center gap-1 rounded-lg bg-[var(--lagoon)] px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90">
 												<Check size={13} />

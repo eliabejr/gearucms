@@ -1,5 +1,5 @@
 export { createGearuTRPC } from "./init"
-export type { GearuTRPCContext } from "./init"
+export type { CreateGearuTRPCOptions, GearuTRPCContext } from "./init"
 export { getUserFacingErrorMessage } from "./error-handler"
 export {
 	createAiRouter,
@@ -11,5 +11,12 @@ export {
 	createMediaRouter,
 	createSettingsRouter,
 } from "./router"
-export type { CreateGearuRouterContext } from "./router"
+export type {
+	CreateGearuRouterContext,
+	GearuCommentPolicy,
+	GearuEntryLifecycleEvent,
+	GearuLifecycleHooks,
+	GearuMediaRecord,
+	GearuStorageAdapter,
+} from "./router"
 export type { GearuTRPCInputs, GearuTRPCOutputs, GearuTRPCRouter } from "./types"

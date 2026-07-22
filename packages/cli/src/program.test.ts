@@ -21,7 +21,8 @@ CREATE TABLE collection_fields (
   slug TEXT NOT NULL,
   type TEXT NOT NULL,
   required INTEGER DEFAULT 0,
-  sort_order INTEGER DEFAULT 0
+  sort_order INTEGER DEFAULT 0,
+  config TEXT
 );
 
 CREATE TABLE entries (
@@ -132,7 +133,7 @@ describe("gearu CLI CRUD commands", () => {
         data: Array<{ slug: string }>
       }
 
-      expect(result.exitCode).toBeUndefined()
+      expect(result.stderr).toEqual([])
       expect(payload.success).toBe(true)
       expect(payload.data[0]?.slug).toBe("blog")
     } finally {

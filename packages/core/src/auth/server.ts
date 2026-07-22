@@ -1,11 +1,9 @@
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3"
 import { betterAuth } from "better-auth"
 import type { BetterAuthPlugin } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
-import type { CoreSchema } from "../db"
 import { account, session, user, verification } from "../schema/index"
 
 export interface CreateGearuAuthOptions {
@@ -33,13 +31,37 @@ export interface GearuAuthServerHelpers {
  * Host apps can still extend the config with providers, hooks, plugins, and secrets.
  */
 export function createGearuAuth(
-	db: BetterSQLite3Database<CoreSchema>,
+	// Better Auth's Drizzle adapter supports every SQLite-compatible Drizzle
+	// driver. Keeping this structural avoids pulling a native driver into edge
+	// auth bundles.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	db: any,
 	options: CreateGearuAuthOptions = {},
 ) {
-	const { emailAndPassword, plugins = [], ...rest } = options
+	const { emailAndPassword, plugins = [], user: userOptions, ...rest } = options
+	const configuredUser =
+		userOptions && typeof userOptions === "object"
+			? (userOptions as Record<string, unknown>)
+			: {}
+	const configuredAdditionalFields =
+		configuredUser.additionalFields && typeof configuredUser.additionalFields === "object"
+			? (configuredUser.additionalFields as Record<string, unknown>)
+			: {}
 
 	return betterAuth({
 		...(rest as Record<string, unknown>),
+		user: {
+			...configuredUser,
+			additionalFields: {
+				...configuredAdditionalFields,
+				role: {
+					type: "string",
+					required: false,
+					defaultValue: "member",
+					input: false,
+				},
+			},
+		},
 		database: drizzleAdapter(db, {
 			provider: "sqlite",
 			schema: {

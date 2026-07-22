@@ -9,7 +9,9 @@ export type {
   GearuPluginTRPCRouter,
 } from "./plugin"
 export { createDb } from "./db"
-export type { CreateDbOptions, CoreSchema } from "./db"
+export type { CreateDbOptions, CoreSchema } from "./db-schema"
+export { buildGearuSchema } from "./db-schema"
+export type { GearuSchema } from "./db-schema"
 export type { GearuContext } from "./context"
 export * from "./schema/index"
 export * from "./schema/relations"
@@ -38,6 +40,15 @@ export {
   prepareEntryJsonLd,
 } from "./seo"
 export type { SeoMeta, SeoCheck, SeoScore } from "./seo"
+export {
+	GEARU_ROLES,
+	hashRateLimitKey,
+	isEditorialRole,
+	isPublicSettingKey,
+	sanitizeComment,
+	slugify,
+} from "./security"
+export type { GearuEditorialRole, GearuRole } from "./security"
 
 // Robots, sitemap, OG image generators
 export { generateRobotsTxt } from "./robots"

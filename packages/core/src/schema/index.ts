@@ -5,6 +5,7 @@ export const user = sqliteTable("user", {
 	id: text().primaryKey(),
 	name: text().notNull(),
 	email: text().notNull().unique(),
+	role: text().notNull().default("member"),
 	emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
 	image: text(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
@@ -61,6 +62,18 @@ export const collections = sqliteTable("collections", {
 	),
 })
 
+export const collectionRedirects = sqliteTable("collection_redirects", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	collectionId: integer("collection_id")
+		.notNull()
+		.references(() => collections.id, { onDelete: "cascade" }),
+	oldSlug: text("old_slug").notNull(),
+	newSlug: text("new_slug").notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(
+		sql`(unixepoch())`,
+	),
+})
+
 export const collectionFields = sqliteTable("collection_fields", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	collectionId: integer("collection_id")
@@ -71,6 +84,7 @@ export const collectionFields = sqliteTable("collection_fields", {
 	type: text().notNull(),
 	required: integer({ mode: "boolean" }).default(false),
 	sortOrder: integer("sort_order").default(0),
+	config: text(),
 })
 
 export const entries = sqliteTable("entries", {
@@ -117,6 +131,19 @@ export const entryVersions = sqliteTable("entry_versions", {
 	createdBy: text("created_by"),
 })
 
+export const entryRedirects = sqliteTable("entry_redirects", {
+	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+	entryId: integer("entry_id")
+		.notNull()
+		.references(() => entries.id, { onDelete: "cascade" }),
+	collectionSlug: text("collection_slug").notNull(),
+	oldSlug: text("old_slug").notNull(),
+	newSlug: text("new_slug").notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(
+		sql`(unixepoch())`,
+	),
+})
+
 export const media = sqliteTable("media", {
 	id: integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
 	filename: text().notNull(),
@@ -126,6 +153,11 @@ export const media = sqliteTable("media", {
 	mimeType: text("mime_type").notNull(),
 	width: integer(),
 	height: integer(),
+	altText: text("alt_text"),
+	caption: text(),
+	focalX: integer("focal_x"),
+	focalY: integer("focal_y"),
+	variants: text(),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),
@@ -138,7 +170,10 @@ export const comments = sqliteTable("comments", {
 		.references(() => entries.id, { onDelete: "cascade" }),
 	authorName: text("author_name").notNull(),
 	authorEmail: text("author_email").notNull(),
+	userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
 	content: text().notNull(),
+	rateLimitKey: text("rate_limit_key"),
+	spamScore: integer("spam_score").default(0),
 	status: text().notNull().default("pending"),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
@@ -151,6 +186,7 @@ export const trackingScripts = sqliteTable("tracking_scripts", {
 	location: text().notNull(),
 	script: text().notNull(),
 	active: integer({ mode: "boolean" }).default(true),
+	trusted: integer({ mode: "boolean" }).notNull().default(false),
 	createdAt: integer("created_at", { mode: "timestamp" }).default(
 		sql`(unixepoch())`,
 	),

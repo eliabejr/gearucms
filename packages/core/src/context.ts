@@ -1,7 +1,5 @@
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3"
 import type { ResolvedGearuConfig } from "./config"
 import type { GearuPlugin } from "./plugin"
-import type { CoreSchema } from "./db"
 
 /**
  * Runtime context for Gearu: config, db, and registered plugins.
@@ -9,7 +7,8 @@ import type { CoreSchema } from "./db"
  */
 export interface GearuContext {
   config: ResolvedGearuConfig
-  db: BetterSQLite3Database<CoreSchema>
+  /** Any SQLite-compatible Drizzle database, including libSQL and better-sqlite3. */
+  db: unknown
   plugins: GearuPlugin[]
   /** Auth instance is app-specific (better-auth); not created by core */
   auth?: unknown
